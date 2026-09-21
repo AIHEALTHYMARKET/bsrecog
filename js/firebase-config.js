@@ -19,7 +19,7 @@ export const firebaseConfig = {
 // ============================================================
 
 export const APPS_SCRIPT_URL =
-  "請把你的Google Apps Script /exec網址貼在這裡";
+  "https://script.google.com/macros/library/d/1Dr6G8a63Sbq3d5ix67FS09I0MS-xzjdkA5aaS0LcDKKIqV8SkIxvIMMJ/2";
 
 // ============================================================
 // 管理員 Google Email
