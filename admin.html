@@ -6,132 +6,303 @@
 <meta charset="UTF-8">
 
 <meta name="viewport"
-      content="width=device-width,initial-scale=1">
+      content="width=device-width,
+      initial-scale=1.0,
+      maximum-scale=1.0,
+      user-scalable=no">
 
-<title>BS GLOBAL Admin</title>
-
-<script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore-compat.js"></script>
-
-<script src="./config.js"></script>
+<title>BS GLOBAL｜管理員後台</title>
 
 <style>
 
-*{
-  box-sizing:border-box;
+* {
+    box-sizing: border-box;
 }
 
-body{
-  margin:0;
-  background:#080808;
-  color:#fff;
-  font-family:-apple-system,
-  BlinkMacSystemFont,
-  "Noto Sans TC",
-  Arial,sans-serif;
+body {
+    margin: 0;
+    background:
+        radial-gradient(
+            circle at top,
+            #252525 0%,
+            #0d0d0d 45%,
+            #050505 100%
+        );
+    color: #fff;
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Noto Sans TC",
+        "PingFang TC",
+        Arial,
+        sans-serif;
 }
 
-.container{
-  max-width:1200px;
-  margin:auto;
-  padding:25px 15px 60px;
+.container {
+    max-width: 1100px;
+    margin: auto;
+    padding: 25px 18px 60px;
 }
 
-.gold{
-  color:#D4AF37;
+.header {
+    text-align: center;
+    margin-bottom: 25px;
 }
 
-h1{
-  font-size:34px;
+.logo {
+    color: #d4af37;
+    font-size: 13px;
+    letter-spacing: 5px;
+    font-weight: 700;
 }
 
-.card{
-  background:#111;
-  border:1px solid #292929;
-  border-radius:18px;
-  padding:22px;
-  margin-bottom:18px;
+.title {
+    font-size: 30px;
+    margin: 8px 0;
 }
 
-button{
-  border:0;
-  border-radius:9px;
-  padding:11px 16px;
-  cursor:pointer;
-  margin:3px;
+.subtitle {
+    color: #888;
+    font-size: 13px;
 }
 
-.btn-gold{
-  background:#D4AF37;
-  color:#000;
-  font-weight:800;
+.card {
+    background: #151515;
+    border: 1px solid #333;
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 18px;
 }
 
-.btn-dark{
-  background:#252525;
-  color:#fff;
+.card-title {
+    color: #d4af37;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 18px;
 }
 
-.btn-red{
-  background:#9D2828;
-  color:#fff;
+.user-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    background: #101010;
+    border: 1px solid #333;
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 20px;
 }
 
-input{
-  padding:11px;
-  border-radius:8px;
-  border:1px solid #333;
-  background:#080808;
-  color:#fff;
+button {
+    border: none;
+    border-radius: 10px;
+    padding: 11px 15px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
 }
 
-.toolbar{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
+.btn-gold {
+    background: linear-gradient(
+        135deg,
+        #b88a18,
+        #d4af37,
+        #f1d778
+    );
+    color: #111;
 }
 
-.item{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:10px;
-  background:#171717;
-  border-radius:8px;
-  margin:6px 0;
+.btn-dark {
+    background: #222;
+    border: 1px solid #444;
+    color: #ddd;
 }
 
-.record{
-  padding:16px;
-  border:1px solid #292929;
-  border-radius:12px;
-  margin:10px 0;
-  background:#141414;
+.btn-danger {
+    background: #321414;
+    color: #ff9999;
+    border: 1px solid #633;
 }
 
-.record-name{
-  font-size:21px;
-  font-weight:800;
-  color:#D4AF37;
+.btn-blue {
+    background: #18314b;
+    color: #a8d1ff;
+    border: 1px solid #34516f;
 }
 
-.small{
-  color:#777;
-  font-size:13px;
+.login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
 }
 
-.status{
-  display:none;
-  padding:14px;
-  border-radius:10px;
-  background:#17351F;
-  color:#A7E8B5;
-  margin-top:15px;
+.login-box {
+    width: 100%;
+    max-width: 430px;
+    text-align: center;
+    background: #151515;
+    border: 1px solid #333;
+    border-radius: 20px;
+    padding: 35px 25px;
 }
 
-iframe{
-  display:none;
+input {
+    background: #0d0d0d;
+    border: 1px solid #444;
+    color: #fff;
+    border-radius: 8px;
+    padding: 10px;
+    width: 100%;
+}
+
+.status {
+    display: none;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    line-height: 1.5;
+    font-size: 13px;
+}
+
+.status.success {
+    display: block;
+    background: #102b1b;
+    color: #8fe0aa;
+    border: 1px solid #28633d;
+}
+
+.status.error {
+    display: block;
+    background: #321414;
+    color: #ff9d9d;
+    border: 1px solid #633;
+}
+
+.status.info {
+    display: block;
+    background: #172333;
+    color: #a8d1ff;
+    border: 1px solid #34516f;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns:
+        repeat(3,1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.stat {
+    background: #101010;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+}
+
+.stat-number {
+    color: #d4af37;
+    font-size: 26px;
+    font-weight: 800;
+}
+
+.stat-label {
+    color: #888;
+    font-size: 12px;
+}
+
+.setting-item {
+    display: flex;
+    gap: 7px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.setting-item input {
+    flex: 1;
+}
+
+.setting-item button {
+    padding: 9px 11px;
+}
+
+.add-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.add-row input {
+    flex: 1;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 850px;
+}
+
+th {
+    color: #d4af37;
+    text-align: left;
+    font-size: 12px;
+    border-bottom: 1px solid #444;
+    padding: 10px;
+}
+
+td {
+    border-bottom: 1px solid #292929;
+    padding: 10px;
+    font-size: 12px;
+    vertical-align: top;
+}
+
+.tag {
+    display: inline-block;
+    color: #d4af37;
+    background: rgba(212,175,55,.1);
+    border: 1px solid #705b20;
+    border-radius: 20px;
+    padding: 4px 7px;
+    margin: 2px;
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.actions button {
+    padding: 8px 10px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.login-error {
+    margin-top: 15px;
+}
+
+@media(max-width:700px) {
+
+    .stats {
+        grid-template-columns: 1fr;
+    }
+
+    .user-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
 }
 
 </style>
@@ -140,1049 +311,2032 @@ iframe{
 
 <body>
 
+
+<!-- ============================================================
+     LOGIN
+============================================================ -->
+
+<div
+    id="loginScreen"
+    class="login-screen">
+
+    <div class="login-box">
+
+        <div
+            class="logo"
+            style="margin-bottom:15px;">
+            BS GLOBAL
+        </div>
+
+        <div
+            style="
+                font-size:28px;
+                font-weight:800;
+                margin-bottom:8px;">
+            管理員後台
+        </div>
+
+        <div
+            style="
+                color:#888;
+                font-size:14px;
+                line-height:1.7;
+                margin-bottom:25px;">
+            請使用管理員 Google 帳號登入
+        </div>
+
+        <button
+            id="loginBtn"
+            class="btn-gold"
+            style="width:100%;">
+            使用 Google 登入
+        </button>
+
+        <div
+            id="loginError"
+            class="status error login-error">
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ============================================================
+     ADMIN MAIN
+============================================================ -->
+
+<div
+    id="mainScreen"
+    class="hidden">
+
 <div class="container">
 
-<h1>
-<span class="gold">BS GLOBAL</span>
-Admin
-</h1>
+
+    <div class="header">
+
+        <div class="logo">
+            BS GLOBAL
+        </div>
+
+        <h1 class="title">
+            榮耀時刻表揚
+        </h1>
+
+        <div class="subtitle">
+            管理員後台
+        </div>
+
+    </div>
 
 
-<div class="card">
+    <div
+        id="statusBox"
+        class="status">
+    </div>
 
-<div id="loginBox">
 
-<button class="btn-gold"
-        onclick="login()">
-Admin Google 登入
-</button>
+    <div class="user-bar">
+
+        <div>
+
+            <div
+                style="
+                    font-size:13px;
+                    color:#888;">
+                管理員
+            </div>
+
+            <div
+                id="adminEmail"
+                style="
+                    font-weight:700;
+                    margin-top:4px;">
+            </div>
+
+        </div>
+
+        <button
+            id="logoutBtn"
+            class="btn-dark">
+            登出
+        </button>
+
+    </div>
+
+
+    <!-- ======================================================
+         統計
+    ======================================================= -->
+
+    <div class="stats">
+
+        <div class="stat">
+
+            <div
+                id="totalCount"
+                class="stat-number">
+                0
+            </div>
+
+            <div class="stat-label">
+                表揚人數
+            </div>
+
+        </div>
+
+        <div class="stat">
+
+            <div
+                id="platinumCount"
+                class="stat-number">
+                0
+            </div>
+
+            <div class="stat-label">
+                上線白金
+            </div>
+
+        </div>
+
+        <div class="stat">
+
+            <div
+                id="awardCount"
+                class="stat-number">
+                0
+            </div>
+
+            <div class="stat-label">
+                突破獎銜
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ======================================================
+         設定
+    ======================================================= -->
+
+    <div class="card">
+
+        <div class="card-title">
+            上線白金設定
+        </div>
+
+        <div
+            id="platinumSettings">
+        </div>
+
+        <div class="add-row">
+
+            <input
+                id="newPlatinum"
+                placeholder="新增上線白金">
+
+            <button
+                id="addPlatinumBtn"
+                class="btn-gold">
+                新增
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-title">
+            突破獎銜設定
+        </div>
+
+        <div
+            style="
+                color:#888;
+                font-size:12px;
+                margin-bottom:15px;">
+            排列順序會影響 PPT 判定「最高獎銜」。
+            越下面代表越高。
+        </div>
+
+        <div
+            id="awardSettings">
+        </div>
+
+        <div class="add-row">
+
+            <input
+                id="newAward"
+                placeholder="新增突破獎銜">
+
+            <button
+                id="addAwardBtn"
+                class="btn-gold">
+                新增
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- ======================================================
+         PPT
+    ======================================================= -->
+
+    <div class="card">
+
+        <div class="card-title">
+            PPT 榮耀表揚
+        </div>
+
+        <div
+            style="
+                color:#999;
+                font-size:13px;
+                line-height:1.7;
+                margin-bottom:15px;">
+
+            系統會按照目前設定的獎銜順序，
+            自動整理每位表揚者的最高獎銜，
+            並製作黑金風格 PPT。
+
+            <br><br>
+
+            每一個獎銜最多 3 人一頁。
+
+        </div>
+
+        <button
+            id="generatePptBtn"
+            class="btn-gold"
+            style="width:100%;">
+            一鍵生成完整 PPT
+        </button>
+
+        <div
+            id="pptResult"
+            style="
+                margin-top:15px;">
+        </div>
+
+    </div>
+
+
+    <!-- ======================================================
+         匯出
+    ======================================================= -->
+
+    <div class="card">
+
+        <div class="card-title">
+            資料匯出
+        </div>
+
+        <div
+            style="
+                color:#888;
+                font-size:13px;
+                margin-bottom:15px;">
+            可以將全部表揚資料下載保存。
+        </div>
+
+        <div
+            style="
+                display:flex;
+                gap:10px;
+                flex-wrap:wrap;">
+
+            <button
+                id="csvBtn"
+                class="btn-blue">
+                下載 CSV
+            </button>
+
+            <button
+                id="jsonBtn"
+                class="btn-blue">
+                下載 JSON
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- ======================================================
+         所有資料
+    ======================================================= -->
+
+    <div class="card">
+
+        <div class="card-title">
+            所有表揚資料
+        </div>
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>姓名</th>
+
+                        <th>職業</th>
+
+                        <th>上線白金</th>
+
+                        <th>突破獎銜</th>
+
+                        <th>填寫者</th>
+
+                        <th>照片</th>
+
+                        <th>操作</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody
+                    id="recordsBody">
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+</div>
 
 </div>
 
 
-<div id="adminBox"
-     style="display:none">
-
-登入：
-
-<span id="email"></span>
-
-<button class="btn-dark"
-        onclick="logout()">
-登出
-</button>
-
-</div>
-
-</div>
-
-
-<div id="main"
-     style="display:none">
-
-
-<!-- ===================================================
-     UPLINE
-=================================================== -->
-
-<div class="card">
-
-<h2>
-上線白金管理
-</h2>
-
-<div class="toolbar">
-
-<input
-  id="newUpline"
-  placeholder="輸入新增白金">
-
-<button
-  class="btn-gold"
-  onclick="addUpline()">
-新增
-</button>
-
-</div>
-
-<div id="uplines">
-</div>
-
-</div>
-
-
-<!-- ===================================================
-     AWARDS
-=================================================== -->
-
-<div class="card">
-
-<h2>
-突破獎銜管理
-</h2>
-
-<div class="toolbar">
-
-<input
-  id="newAward"
-  placeholder="輸入新增獎銜">
-
-<button
-  class="btn-gold"
-  onclick="addAward()">
-新增
-</button>
-
-</div>
-
-<div id="awards">
-</div>
-
-</div>
-
-
-<!-- ===================================================
-     EXPORT
-=================================================== -->
-
-<div class="card">
-
-<h2>
-資料導出
-</h2>
-
-<button
-  class="btn-dark"
-  onclick="exportCSV()">
-下載全部 CSV
-</button>
-
-
-<button
-  class="btn-gold"
-  onclick="generatePPT()">
-一鍵生成完整 PPT
-</button>
-
-
-<div id="status"
-     class="status">
-</div>
-
-</div>
-
-
-<!-- ===================================================
-     RECORDS
-=================================================== -->
-
-<div class="card">
-
-<h2>
-全部表揚資料
-</h2>
-
-<div id="records">
-</div>
-
-</div>
-
-</div>
-
-
-<iframe id="backendFrame"
-        name="backendFrame">
+<iframe
+    id="gasFrame"
+    name="gasFrame"
+    style="
+        width:0;
+        height:0;
+        border:0;
+        position:absolute;
+        left:-9999px;">
 </iframe>
 
-</div>
+
+<script type="module">
+
+import {
+    initializeApp
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+
+import {
+    getAuth,
+    GoogleAuthProvider,
+    signInWithPopup,
+    signOut,
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+import {
+    getFirestore,
+    collection,
+    getDocs,
+    doc,
+    getDoc,
+    setDoc,
+    deleteDoc
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+import {
+    firebaseConfig,
+    APPS_SCRIPT_URL,
+    ADMIN_EMAIL
+} from "./js/firebase-config.js";
 
 
-<script>
+/* ============================================================
+   Firebase
+============================================================ */
 
-firebase.initializeApp(
-  CONFIG.firebase
-);
+const app =
+    initializeApp(
+        firebaseConfig
+    );
 
 const auth =
-  firebase.auth();
+    getAuth(app);
 
 const db =
-  firebase.firestore();
+    getFirestore(app);
+
+const provider =
+    new GoogleAuthProvider();
+
+provider.setCustomParameters({
+    prompt: "select_account"
+});
 
 
-let currentUser=null;
+/* ============================================================
+   DOM
+============================================================ */
 
-let settings=null;
-
-let records=[];
-
-
-/* =====================================================
-   LOGIN
-===================================================== */
-
-async function login(){
-
-  const provider =
-    new firebase.auth.GoogleAuthProvider();
-
-  try{
-
-    await auth.signInWithPopup(
-      provider
+const loginScreen =
+    document.getElementById(
+        "loginScreen"
     );
 
-  }catch(error){
-
-    alert(
-      "登入失敗：\n" +
-      error.message
+const mainScreen =
+    document.getElementById(
+        "mainScreen"
     );
 
-  }
+const loginBtn =
+    document.getElementById(
+        "loginBtn"
+    );
+
+const loginError =
+    document.getElementById(
+        "loginError"
+    );
+
+const logoutBtn =
+    document.getElementById(
+        "logoutBtn"
+    );
+
+const statusBox =
+    document.getElementById(
+        "statusBox"
+    );
+
+const recordsBody =
+    document.getElementById(
+        "recordsBody"
+    );
+
+const platinumSettings =
+    document.getElementById(
+        "platinumSettings"
+    );
+
+const awardSettings =
+    document.getElementById(
+        "awardSettings"
+    );
+
+
+/* ============================================================
+   狀態
+============================================================ */
+
+let currentUser = null;
+
+let records = [];
+
+let settings = {
+
+    platinumList: [],
+
+    awardList: []
+
+};
+
+
+/* ============================================================
+   防止 Popup 重複
+============================================================ */
+
+let loginInProgress = false;
+
+
+/* ============================================================
+   預設資料
+============================================================ */
+
+const DEFAULT_PLATINUMS = [
+
+    "Sense&Lavenier",
+    "Amos",
+    "Sunny",
+    "Robin&Zoey",
+    "RyanLio",
+    "Wyane&Momo",
+    "Jess",
+    "SzeChew",
+    "Lynn",
+    "Keong&Ngah"
+
+];
+
+
+const DEFAULT_AWARDS = [
+
+    "Silver Inner Circle",
+    "Gold Inner Circle",
+    "100% User",
+    "100ppv",
+    "3%",
+    "300ppv",
+    "600ppv",
+    "6%",
+    "1000ppv",
+    "9%",
+    "12%",
+    "Bronze Foundation",
+    "15%",
+    "18%",
+    "Bronze Builder",
+    "Core",
+    "Super core",
+    "Silver producer",
+    "Gold producer",
+    "Platinum",
+    "Founder Platinum"
+
+];
+
+
+/* ============================================================
+   Escape
+============================================================ */
+
+function escapeHtml(value) {
+
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 
 }
 
 
-async function logout(){
+/* ============================================================
+   Status
+============================================================ */
 
-  await auth.signOut();
+function showStatus(
+    message,
+    type = "info"
+) {
+
+    statusBox.className =
+        "status " + type;
+
+    statusBox.textContent =
+        message;
 
 }
 
 
-auth.onAuthStateChanged(
-  async user => {
+/* ============================================================
+   Google Login
+============================================================ */
 
-    currentUser=user;
+async function login() {
 
+    if (loginInProgress) {
+        return;
+    }
 
-    if(!user){
+    if (auth.currentUser) {
+        return;
+    }
 
-      document.getElementById(
-        "loginBox"
-      ).style.display="block";
+    loginInProgress = true;
 
-      document.getElementById(
-        "adminBox"
-      ).style.display="none";
+    loginBtn.disabled = true;
 
-      document.getElementById(
-        "main"
-      ).style.display="none";
+    loginBtn.textContent =
+        "Google 登入中...";
 
-      return;
+    loginError.className =
+        "status";
+
+    try {
+
+        await signInWithPopup(
+            auth,
+            provider
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+        loginError.className =
+            "status error login-error";
+
+        if (
+            error.code ===
+            "auth/cancelled-popup-request"
+        ) {
+
+            loginError.textContent =
+                "Google 登入視窗正在處理中，請不要重複點擊。";
+
+        } else if (
+            error.code ===
+            "auth/popup-closed-by-user"
+        ) {
+
+            loginError.textContent =
+                "登入視窗已關閉，請重新登入。";
+
+        } else {
+
+            loginError.textContent =
+                "Google 登入失敗：" +
+                (
+                    error.message ||
+                    error.code
+                );
+
+        }
+
+    } finally {
+
+        setTimeout(
+            () => {
+
+                loginInProgress =
+                    false;
+
+                loginBtn.disabled =
+                    false;
+
+                loginBtn.textContent =
+                    "使用 Google 登入";
+
+            },
+            800
+        );
 
     }
 
-
-    if(
-      user.email.toLowerCase() !==
-      CONFIG.adminEmail.toLowerCase()
-    ){
-
-      alert(
-        "這個帳號不是 Admin。"
-      );
-
-      await auth.signOut();
-
-      return;
-
-    }
+}
 
 
-    document.getElementById(
-      "loginBox"
-    ).style.display="none";
-
-
-    document.getElementById(
-      "adminBox"
-    ).style.display="block";
-
-
-    document.getElementById(
-      "main"
-    ).style.display="block";
-
-
-    document.getElementById(
-      "email"
-    ).textContent=user.email;
-
-
-    await loadSettings();
-
-    await loadRecords();
-
-  }
+loginBtn.addEventListener(
+    "click",
+    login
 );
 
 
-/* =====================================================
-   SETTINGS
-===================================================== */
+/* ============================================================
+   Logout
+============================================================ */
 
-async function loadSettings(){
+logoutBtn.addEventListener(
+    "click",
+    async () => {
 
-  const ref =
-    db.collection(
-      "settings"
-    ).doc("app");
+        await signOut(auth);
 
-
-  const snap =
-    await ref.get();
+    }
+);
 
 
-  if(!snap.exists){
+/* ============================================================
+   Auth
+============================================================ */
 
-    settings={
+onAuthStateChanged(
+    auth,
+    async user => {
 
-      uplines:
-        CONFIG.uplines,
+        currentUser =
+            user;
 
-      awards:
-        CONFIG.awards
+
+        if (!user) {
+
+            loginScreen.classList.remove(
+                "hidden"
+            );
+
+            mainScreen.classList.add(
+                "hidden"
+            );
+
+            return;
+
+        }
+
+
+        if (
+            !user.email ||
+            user.email.toLowerCase() !==
+                ADMIN_EMAIL.toLowerCase()
+        ) {
+
+            await signOut(auth);
+
+            loginError.className =
+                "status error login-error";
+
+            loginError.textContent =
+                "這個 Google 帳號不是管理員帳號。";
+
+            return;
+
+        }
+
+
+        loginScreen.classList.add(
+            "hidden"
+        );
+
+        mainScreen.classList.remove(
+            "hidden"
+        );
+
+
+        document.getElementById(
+            "adminEmail"
+        ).textContent =
+            user.email;
+
+
+        await ensureSettings();
+
+        await loadSettings();
+
+        await loadRecords();
+
+    }
+);
+
+
+/* ============================================================
+   確保 Settings 存在
+============================================================ */
+
+async function ensureSettings() {
+
+    const ref =
+        doc(
+            db,
+            "settings",
+            "config"
+        );
+
+    const snap =
+        await getDoc(ref);
+
+
+    if (!snap.exists()) {
+
+        await setDoc(
+            ref,
+            {
+
+                platinumList:
+                    DEFAULT_PLATINUMS,
+
+                awardList:
+                    DEFAULT_AWARDS
+
+            }
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   載入 Settings
+============================================================ */
+
+async function loadSettings() {
+
+    const snap =
+        await getDoc(
+            doc(
+                db,
+                "settings",
+                "config"
+            )
+        );
+
+
+    if (snap.exists()) {
+
+        const data =
+            snap.data();
+
+        settings = {
+
+            platinumList:
+                Array.isArray(
+                    data.platinumList
+                )
+                    ? data.platinumList
+                    : DEFAULT_PLATINUMS,
+
+            awardList:
+                Array.isArray(
+                    data.awardList
+                )
+                    ? data.awardList
+                    : DEFAULT_AWARDS
+
+        };
+
+    }
+
+
+    renderSettings();
+
+}
+
+
+/* ============================================================
+   Render Settings
+============================================================ */
+
+function renderSettings() {
+
+    platinumSettings.innerHTML =
+        settings.platinumList
+            .map(
+                (item, index) => `
+
+                <div class="setting-item">
+
+                    <input
+                        value="${escapeHtml(item)}"
+                        data-type="platinum"
+                        data-index="${index}">
+
+                    <button
+                        class="btn-dark"
+                        onclick="window.moveSetting('platinum',${index},-1)">
+                        ↑
+                    </button>
+
+                    <button
+                        class="btn-dark"
+                        onclick="window.moveSetting('platinum',${index},1)">
+                        ↓
+                    </button>
+
+                    <button
+                        class="btn-danger"
+                        onclick="window.deleteSetting('platinum',${index})">
+                        刪除
+                    </button>
+
+                </div>
+
+            `
+            )
+            .join("");
+
+
+    awardSettings.innerHTML =
+        settings.awardList
+            .map(
+                (item, index) => `
+
+                <div class="setting-item">
+
+                    <input
+                        value="${escapeHtml(item)}"
+                        data-type="award"
+                        data-index="${index}">
+
+                    <button
+                        class="btn-dark"
+                        onclick="window.moveSetting('award',${index},-1)">
+                        ↑
+                    </button>
+
+                    <button
+                        class="btn-dark"
+                        onclick="window.moveSetting('award',${index},1)">
+                        ↓
+                    </button>
+
+                    <button
+                        class="btn-danger"
+                        onclick="window.deleteSetting('award',${index})">
+                        刪除
+                    </button>
+
+                </div>
+
+            `
+            )
+            .join("");
+
+}
+
+
+/* ============================================================
+   取得畫面上修改後的文字
+============================================================ */
+
+function readSettingInputs() {
+
+    document
+        .querySelectorAll(
+            ".setting-item input"
+        )
+        .forEach(input => {
+
+            const type =
+                input.dataset.type;
+
+            const index =
+                Number(
+                    input.dataset.index
+                );
+
+            const value =
+                input.value.trim();
+
+
+            if (!value) {
+                return;
+            }
+
+
+            if (
+                type === "platinum"
+            ) {
+
+                settings.platinumList[index] =
+                    value;
+
+            } else {
+
+                settings.awardList[index] =
+                    value;
+
+            }
+
+        });
+
+}
+
+
+/* ============================================================
+   儲存 Settings
+============================================================ */
+
+async function saveSettings() {
+
+    readSettingInputs();
+
+
+    await setDoc(
+        doc(
+            db,
+            "settings",
+            "config"
+        ),
+        {
+
+            platinumList:
+                settings.platinumList,
+
+            awardList:
+                settings.awardList
+
+        }
+    );
+
+
+    renderSettings();
+
+    showStatus(
+        "設定已儲存。",
+        "success"
+    );
+
+}
+
+
+/* ============================================================
+   移動
+============================================================ */
+
+window.moveSetting =
+    async function(
+        type,
+        index,
+        direction
+    ) {
+
+        readSettingInputs();
+
+
+        const list =
+            type === "platinum"
+                ? settings.platinumList
+                : settings.awardList;
+
+
+        const newIndex =
+            index + direction;
+
+
+        if (
+            newIndex < 0 ||
+            newIndex >= list.length
+        ) {
+
+            return;
+
+        }
+
+
+        [
+            list[index],
+            list[newIndex]
+        ] = [
+            list[newIndex],
+            list[index]
+        ];
+
+
+        await saveSettings();
 
     };
 
 
-    await ref.set(
-      settings
+/* ============================================================
+   Delete Setting
+============================================================ */
+
+window.deleteSetting =
+    async function(
+        type,
+        index
+    ) {
+
+        readSettingInputs();
+
+
+        const list =
+            type === "platinum"
+                ? settings.platinumList
+                : settings.awardList;
+
+
+        const name =
+            list[index];
+
+
+        if (
+            !confirm(
+                `確定刪除「${name}」嗎？`
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        list.splice(
+            index,
+            1
+        );
+
+
+        await saveSettings();
+
+    };
+
+
+/* ============================================================
+   Add Platinum
+============================================================ */
+
+document
+    .getElementById(
+        "addPlatinumBtn"
+    )
+    .addEventListener(
+        "click",
+        async () => {
+
+            const input =
+                document.getElementById(
+                    "newPlatinum"
+                );
+
+            const value =
+                input.value.trim();
+
+
+            if (!value) {
+                return;
+            }
+
+
+            readSettingInputs();
+
+
+            if (
+                settings.platinumList
+                    .includes(value)
+            ) {
+
+                alert(
+                    "這個上線白金已經存在。"
+                );
+
+                return;
+
+            }
+
+
+            settings.platinumList.push(
+                value
+            );
+
+
+            input.value = "";
+
+
+            await saveSettings();
+
+        }
     );
 
-  }else{
 
-    settings=
-      snap.data();
+/* ============================================================
+   Add Award
+============================================================ */
 
-  }
+document
+    .getElementById(
+        "addAwardBtn"
+    )
+    .addEventListener(
+        "click",
+        async () => {
+
+            const input =
+                document.getElementById(
+                    "newAward"
+                );
+
+            const value =
+                input.value.trim();
 
 
-  renderSettings();
+            if (!value) {
+                return;
+            }
+
+
+            readSettingInputs();
+
+
+            if (
+                settings.awardList
+                    .includes(value)
+            ) {
+
+                alert(
+                    "這個突破獎銜已經存在。"
+                );
+
+                return;
+
+            }
+
+
+            settings.awardList.push(
+                value
+            );
+
+
+            input.value = "";
+
+
+            await saveSettings();
+
+        }
+    );
+
+
+/* ============================================================
+   Load Records
+============================================================ */
+
+async function loadRecords() {
+
+    const snapshot =
+        await getDocs(
+            collection(
+                db,
+                "recognitions"
+            )
+        );
+
+
+    records =
+        snapshot.docs.map(
+            d => ({
+
+                id:
+                    d.id,
+
+                ...d.data()
+
+            })
+        );
+
+
+    records.sort(
+        (a,b) => {
+
+            const at =
+                a.createdAt?.seconds ||
+                0;
+
+            const bt =
+                b.createdAt?.seconds ||
+                0;
+
+            return bt - at;
+
+        }
+    );
+
+
+    renderRecords();
 
 }
 
 
-function renderSettings(){
+/* ============================================================
+   Render Records
+============================================================ */
 
-  const uplines =
+function renderRecords() {
+
     document.getElementById(
-      "uplines"
-    );
+        "totalCount"
+    ).textContent =
+        records.length;
 
-  uplines.innerHTML="";
 
-
-  settings.uplines.forEach(
-    (name,index)=>{
-
-      const div =
-        document.createElement(
-          "div"
+    const platinumSet =
+        new Set(
+            records
+                .map(
+                    r => r.platinum
+                )
+                .filter(Boolean)
         );
 
-      div.className="item";
 
-
-      const span =
-        document.createElement(
-          "span"
+    const awardSet =
+        new Set(
+            records
+                .flatMap(
+                    r =>
+                        Array.isArray(
+                            r.awards
+                        )
+                            ? r.awards
+                            : []
+                )
         );
 
-      span.textContent=name;
+
+    document.getElementById(
+        "platinumCount"
+    ).textContent =
+        platinumSet.size;
 
 
-      const button =
-        document.createElement(
-          "button"
-        );
-
-      button.className="btn-red";
-
-      button.textContent="刪除";
-
-      button.onclick=()=>{
-        removeUpline(index);
-      };
+    document.getElementById(
+        "awardCount"
+    ).textContent =
+        awardSet.size;
 
 
-      div.appendChild(span);
+    if (!records.length) {
 
-      div.appendChild(button);
+        recordsBody.innerHTML = `
+            <tr>
+                <td colspan="7"
+                    style="
+                        text-align:center;
+                        color:#777;
+                        padding:30px;">
+                    目前沒有資料
+                </td>
+            </tr>
+        `;
 
-      uplines.appendChild(div);
+        return;
 
     }
-  );
 
 
-  const awards =
-    document.getElementById(
-      "awards"
+    recordsBody.innerHTML =
+        records
+            .map(
+                record => {
+
+                    const awards =
+                        Array.isArray(
+                            record.awards
+                        )
+                            ? record.awards
+                            : [];
+
+
+                    const awardHtml =
+                        awards
+                            .map(
+                                a =>
+                                    `<span class="tag">
+                                        ${escapeHtml(a)}
+                                    </span>`
+                            )
+                            .join("");
+
+
+                    const photoHtml =
+                        record.photoDriveUrl
+                            ? `
+                                <a
+                                    href="${escapeHtml(record.photoDriveUrl)}"
+                                    target="_blank"
+                                    style="color:#d4af37;">
+                                    開啟照片
+                                </a>
+                              `
+                            : "-";
+
+
+                    return `
+
+                        <tr>
+
+                            <td>
+                                <strong>
+                                    ${escapeHtml(
+                                        record.name
+                                    )}
+                                </strong>
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    record.occupation
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    record.platinum
+                                )}
+                            </td>
+
+                            <td>
+                                ${awardHtml}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    record.email
+                                )}
+                            </td>
+
+                            <td>
+                                ${photoHtml}
+                            </td>
+
+                            <td>
+
+                                <div class="actions">
+
+                                    <button
+                                        class="btn-danger"
+                                        onclick="window.adminDelete('${record.id}')">
+                                        刪除
+                                    </button>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+}
+
+
+/* ============================================================
+   Admin Delete
+============================================================ */
+
+window.adminDelete =
+    async function(id) {
+
+        const record =
+            records.find(
+                r => r.id === id
+            );
+
+
+        if (!record) {
+            return;
+        }
+
+
+        if (
+            !confirm(
+                `確定刪除「${record.name}」嗎？`
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        try {
+
+            showStatus(
+                "正在刪除...",
+                "info"
+            );
+
+
+            await deleteDoc(
+                doc(
+                    db,
+                    "recognitions",
+                    id
+                )
+            );
+
+
+            if (
+                record.photoFileId
+            ) {
+
+                try {
+
+                    const token =
+                        await currentUser.getIdToken(
+                            true
+                        );
+
+
+                    await postToAppsScript({
+
+                        action:
+                            "deletePhoto",
+
+                        idToken:
+                            token,
+
+                        fileId:
+                            record.photoFileId
+
+                    });
+
+                } catch (error) {
+
+                    console.warn(
+                        "照片刪除失敗",
+                        error
+                    );
+
+                }
+
+            }
+
+
+            await loadRecords();
+
+
+            showStatus(
+                "資料已刪除。",
+                "success"
+            );
+
+
+        } catch (error) {
+
+            showStatus(
+                "刪除失敗：" +
+                error.message,
+                "error"
+            );
+
+        }
+
+    };
+
+
+/* ============================================================
+   Apps Script
+============================================================ */
+
+function postToAppsScript(
+    fields
+) {
+
+    return new Promise(
+        (resolve,reject) => {
+
+            const timeout =
+                setTimeout(
+                    () => {
+
+                        window.removeEventListener(
+                            "message",
+                            listener
+                        );
+
+                        reject(
+                            new Error(
+                                "Apps Script 逾時"
+                            )
+                        );
+
+                    },
+                    90000
+                );
+
+
+            function listener(event) {
+
+                const data =
+                    event.data;
+
+
+                if (
+                    !data ||
+                    data.source !==
+                        "BS_GLOBAL"
+                ) {
+
+                    return;
+
+                }
+
+
+                clearTimeout(
+                    timeout
+                );
+
+
+                window.removeEventListener(
+                    "message",
+                    listener
+                );
+
+
+                if (data.success) {
+
+                    resolve(
+                        data.result
+                    );
+
+                } else {
+
+                    reject(
+                        new Error(
+                            data.error ||
+                            "Apps Script 執行失敗"
+                        )
+                    );
+
+                }
+
+            }
+
+
+            window.addEventListener(
+                "message",
+                listener
+            );
+
+
+            const form =
+                document.createElement(
+                    "form"
+                );
+
+
+            form.method =
+                "POST";
+
+            form.action =
+                APPS_SCRIPT_URL;
+
+            form.target =
+                "gasFrame";
+
+            form.style.display =
+                "none";
+
+
+            Object.entries(fields)
+                .forEach(
+                    ([key,value]) => {
+
+                        const input =
+                            document.createElement(
+                                "input"
+                            );
+
+                        input.type =
+                            "hidden";
+
+                        input.name =
+                            key;
+
+                        input.value =
+                            value ?? "";
+
+                        form.appendChild(
+                            input
+                        );
+
+                    }
+                );
+
+
+            document.body.appendChild(
+                form
+            );
+
+            form.submit();
+
+
+            setTimeout(
+                () => form.remove(),
+                3000
+            );
+
+        }
     );
 
-  awards.innerHTML="";
-
-
-  settings.awards.forEach(
-    (name,index)=>{
-
-      const div =
-        document.createElement(
-          "div"
-        );
-
-      div.className="item";
-
-
-      const span =
-        document.createElement(
-          "span"
-        );
-
-      span.textContent=name;
-
-
-      const button =
-        document.createElement(
-          "button"
-        );
-
-      button.className="btn-red";
-
-      button.textContent="刪除";
-
-      button.onclick=()=>{
-        removeAward(index);
-      };
-
-
-      div.appendChild(span);
-
-      div.appendChild(button);
-
-      awards.appendChild(div);
-
-    }
-  );
-
 }
 
 
-async function saveSettings(){
+/* ============================================================
+   生成 PPT
+============================================================ */
 
-  await db.collection(
-    "settings"
-  )
-  .doc("app")
-  .set({
+document
+    .getElementById(
+        "generatePptBtn"
+    )
+    .addEventListener(
+        "click",
+        async () => {
 
-    uplines:
-      settings.uplines,
+            if (!records.length) {
 
-    awards:
-      settings.awards,
+                alert(
+                    "目前沒有表揚資料，無法生成 PPT。"
+                );
 
-    updatedAt:
-      firebase.firestore.FieldValue
-        .serverTimestamp()
+                return;
 
-  });
-
-}
+            }
 
 
-/* =====================================================
-   UPLINE
-===================================================== */
+            const btn =
+                document.getElementById(
+                    "generatePptBtn"
+                );
 
-async function addUpline(){
 
-  const input =
-    document.getElementById(
-      "newUpline"
+            btn.disabled =
+                true;
+
+            btn.textContent =
+                "PPT 生成中，請稍候...";
+
+
+            document.getElementById(
+                "pptResult"
+            ).innerHTML = `
+                <div class="status info"
+                     style="display:block;">
+                    正在製作完整 PPT，照片較多時可能需要幾分鐘。
+                </div>
+            `;
+
+
+            try {
+
+                const token =
+                    await currentUser.getIdToken(
+                        true
+                    );
+
+
+                const pptRecords =
+                    records.map(
+                        record => ({
+
+                            id:
+                                record.id,
+
+                            name:
+                                record.name,
+
+                            occupation:
+                                record.occupation,
+
+                            platinum:
+                                record.platinum,
+
+                            awards:
+                                Array.isArray(
+                                    record.awards
+                                )
+                                    ? record.awards
+                                    : [],
+
+                            photoFileId:
+                                record.photoFileId ||
+                                "",
+
+                            photoFileName:
+                                record.photoFileName ||
+                                ""
+
+                        })
+                    );
+
+
+                const result =
+                    await postToAppsScript({
+
+                        action:
+                            "generatePpt",
+
+                        idToken:
+                            token,
+
+                        records:
+                            JSON.stringify(
+                                pptRecords
+                            ),
+
+                        awardList:
+                            JSON.stringify(
+                                settings.awardList
+                            )
+
+                    });
+
+
+                document.getElementById(
+                    "pptResult"
+                ).innerHTML = `
+
+                    <div
+                        class="status success"
+                        style="display:block;">
+
+                        PPT 已生成完成。
+
+                        <br><br>
+
+                        <a
+                            href="${escapeHtml(result.downloadUrl)}"
+                            target="_blank"
+                            style="
+                                color:#d4af37;
+                                font-weight:700;">
+                            點擊下載 PPTX
+                        </a>
+
+                    </div>
+
+                `;
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                document.getElementById(
+                    "pptResult"
+                ).innerHTML = `
+
+                    <div
+                        class="status error"
+                        style="display:block;">
+
+                        PPT 生成失敗：
+                        ${escapeHtml(
+                            error.message
+                        )}
+
+                    </div>
+
+                `;
+
+            } finally {
+
+                btn.disabled =
+                    false;
+
+                btn.textContent =
+                    "一鍵生成完整 PPT";
+
+            }
+
+        }
     );
 
 
-  const value =
-    input.value.trim();
-
-
-  if(!value){
-    return;
-  }
-
-
-  if(
-    settings.uplines.includes(
-      value
-    )
-  ){
-
-    alert("已存在");
-
-    return;
-
-  }
-
-
-  settings.uplines.push(
-    value
-  );
-
-
-  await saveSettings();
-
-
-  input.value="";
-
-  renderSettings();
-
-}
-
-
-async function removeUpline(index){
-
-  if(
-    !confirm(
-      "確定刪除此上線白金？"
-    )
-  ){
-    return;
-  }
-
-
-  settings.uplines.splice(
-    index,
-    1
-  );
-
-
-  await saveSettings();
-
-  renderSettings();
-
-}
-
-
-/* =====================================================
-   AWARD
-===================================================== */
-
-async function addAward(){
-
-  const input =
-    document.getElementById(
-      "newAward"
-    );
-
-
-  const value =
-    input.value.trim();
-
-
-  if(!value){
-    return;
-  }
-
-
-  if(
-    settings.awards.includes(
-      value
-    )
-  ){
-
-    alert("已存在");
-
-    return;
-
-  }
-
-
-  settings.awards.push(
-    value
-  );
-
-
-  await saveSettings();
-
-
-  input.value="";
-
-  renderSettings();
-
-}
-
-
-async function removeAward(index){
-
-  if(
-    !confirm(
-      "確定刪除這個獎銜？\n\n" +
-      "舊有表揚資料不會被修改。"
-    )
-  ){
-    return;
-  }
-
-
-  settings.awards.splice(
-    index,
-    1
-  );
-
-
-  await saveSettings();
-
-  renderSettings();
-
-}
-
-
-/* =====================================================
-   RECORDS
-===================================================== */
-
-async function loadRecords(){
-
-  const snapshot =
-    await db.collection(
-      "records"
-    )
-    .orderBy(
-      "createdAt",
-      "asc"
-    )
-    .get();
-
-
-  records=[];
-
-
-  snapshot.forEach(
-    doc => {
-
-      records.push({
-
-        id:doc.id,
-
-        ...doc.data()
-
-      });
-
-    }
-  );
-
-
-  renderRecords();
-
-}
-
-
-function renderRecords(){
-
-  const box =
-    document.getElementById(
-      "records"
-    );
-
-  box.innerHTML="";
-
-
-  records.forEach(
-    (record,index)=>{
-
-      const div =
-        document.createElement(
-          "div"
-        );
-
-      div.className="record";
-
-
-      const name =
-        document.createElement(
-          "div"
-        );
-
-      name.className=
-        "record-name";
-
-      name.textContent=
-        (index+1) +
-        ". " +
-        record.name;
-
-
-      const info =
-        document.createElement(
-          "div"
-        );
-
-      info.className="small";
-
-      info.textContent=
-        "職業：" +
-        record.occupation +
-        " ｜ 上線：" +
-        record.upline +
-        " ｜ 填寫者：" +
-        record.ownerEmail;
-
-
-      const awards =
-        document.createElement(
-          "div"
-        );
-
-      awards.style.marginTop="8px";
-
-      awards.textContent=
-        "獎銜：" +
-        (record.awards || [])
-          .join("、");
-
-
-      const photo =
-        document.createElement(
-          "a"
-        );
-
-      photo.href=
-        record.photoDriveUrl ||
-        "#";
-
-      photo.target="_blank";
-
-      photo.textContent=
-        "查看照片";
-
-
-      div.appendChild(name);
-
-      div.appendChild(info);
-
-      div.appendChild(awards);
-
-      div.appendChild(
-        document.createElement("br")
-      );
-
-      div.appendChild(photo);
-
-
-      box.appendChild(div);
-
-    }
-  );
-
-}
-
-
-/* =====================================================
+/* ============================================================
    CSV
-===================================================== */
+============================================================ */
 
-function csvEscape(value){
+document
+    .getElementById(
+        "csvBtn"
+    )
+    .addEventListener(
+        "click",
+        () => {
 
-  return '"' +
-    String(value ?? "")
-      .replace(/"/g,'""') +
-    '"';
+            const headers = [
 
-}
+                "姓名",
+                "職業",
+                "上線白金",
+                "突破獎銜",
+                "填寫者Email",
+                "照片檔案",
+                "照片Drive"
 
-
-function exportCSV(){
-
-  const rows=[
-
-    [
-      "序號",
-      "表揚者姓名",
-      "表揚者職業",
-      "上線白金",
-      "突破獎銜",
-      "照片檔名",
-      "照片Drive",
-      "填寫者Email"
-    ]
-
-  ];
+            ];
 
 
-  records.forEach(
-    (r,index)=>{
+            const rows =
+                records.map(
+                    r => [
 
-      rows.push([
+                        r.name || "",
 
-        index+1,
+                        r.occupation || "",
 
-        r.name,
+                        r.platinum || "",
 
-        r.occupation,
+                        Array.isArray(
+                            r.awards
+                        )
+                            ? r.awards.join(
+                                " / "
+                            )
+                            : "",
 
-        r.upline,
+                        r.email || "",
 
-        (r.awards || [])
-          .join("、"),
+                        r.photoFileName || "",
 
-        r.photoFileName,
+                        r.photoDriveUrl || ""
 
-        r.photoDriveUrl,
-
-        r.ownerEmail
-
-      ]);
-
-    }
-  );
-
-
-  const csv =
-    "\uFEFF" +
-    rows
-      .map(
-        row =>
-          row
-            .map(csvEscape)
-            .join(",")
-      )
-      .join("\r\n");
+                    ]
+                );
 
 
-  const blob =
-    new Blob(
-      [csv],
-      {
-        type:
-          "text/csv;charset=utf-8"
-      }
+            const csv =
+                "\uFEFF" +
+                [
+                    headers,
+                    ...rows
+                ]
+                    .map(
+                        row =>
+                            row.map(
+                                value =>
+                                    `"${String(value)
+                                        .replace(
+                                            /"/g,
+                                            '""'
+                                        )}"`
+                            ).join(",")
+                    )
+                    .join("\r\n");
+
+
+            downloadFile(
+                csv,
+                "BS_GLOBAL_表揚資料.csv",
+                "text/csv;charset=utf-8;"
+            );
+
+        }
     );
 
 
-  const url =
-    URL.createObjectURL(
-      blob
+/* ============================================================
+   JSON
+============================================================ */
+
+document
+    .getElementById(
+        "jsonBtn"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            const json =
+                JSON.stringify(
+                    records,
+                    null,
+                    2
+                );
+
+
+            downloadFile(
+                json,
+                "BS_GLOBAL_表揚資料.json",
+                "application/json"
+            );
+
+        }
     );
 
 
-  const a =
-    document.createElement(
-      "a"
-    );
+/* ============================================================
+   Download
+============================================================ */
+
+function downloadFile(
+    content,
+    filename,
+    mime
+) {
+
+    const blob =
+        new Blob(
+            [content],
+            { type: mime }
+        );
 
 
-  a.href=url;
-
-  a.download=
-    "BS_GLOBAL_表揚資料.csv";
-
-
-  a.click();
+    const url =
+        URL.createObjectURL(
+            blob
+        );
 
 
-  URL.revokeObjectURL(
-    url
-  );
+    const a =
+        document.createElement(
+            "a"
+        );
 
-}
+    a.href =
+        url;
 
-
-/* =====================================================
-   PPT
-===================================================== */
-
-async function generatePPT(){
-
-  if(!records.length){
-
-    alert(
-      "目前沒有表揚資料"
-    );
-
-    return;
-
-  }
-
-
-  const status =
-    document.getElementById(
-      "status"
-    );
-
-
-  status.style.display="block";
-
-  status.textContent=
-    "正在生成 PPT，請不要關閉頁面……";
-
-
-  try{
-
-    const token =
-      await currentUser.getIdToken(
-        true
-      );
-
-
-    const form =
-      document.createElement(
-        "form"
-      );
-
-
-    form.method="POST";
-
-    form.action=
-      CONFIG.appsScriptUrl;
-
-    form.target="backendFrame";
-
-    form.style.display="none";
-
-
-    addHidden(
-      form,
-      "action",
-      "generatePPT"
-    );
-
-
-    addHidden(
-      form,
-      "idToken",
-      token
-    );
-
-
-    addHidden(
-      form,
-      "records",
-      JSON.stringify(records)
-    );
-
+    a.download =
+        filename;
 
     document.body.appendChild(
-      form
+        a
     );
 
+    a.click();
 
-    form.submit();
+    a.remove();
 
-
-  }catch(error){
-
-    status.textContent=
-      "PPT 生成失敗：" +
-      error.message;
-
-  }
-
-}
-
-
-/* =====================================================
-   RECEIVE PPT RESULT
-===================================================== */
-
-window.addEventListener(
-  "message",
-  event => {
-
-    let data;
-
-
-    try{
-
-      if(
-        typeof event.data ===
-        "string"
-      ){
-
-        data =
-          JSON.parse(
-            event.data
-          );
-
-      }else{
-
-        data=event.data;
-
-      }
-
-    }catch(e){
-
-      return;
-
-    }
-
-
-    if(!data){
-      return;
-    }
-
-
-    const status =
-      document.getElementById(
-        "status"
-      );
-
-
-    if(data.success){
-
-      if(
-        data.downloadUrl
-      ){
-
-        status.innerHTML =
-          "PPT 已完成。 " +
-          "<a href=\"" +
-          data.downloadUrl +
-          "\" target=\"_blank\" " +
-          "style=\"color:#D4AF37\">" +
-          "點擊下載 PPTX" +
-          "</a>";
-
-      }
-
-    }else{
-
-      status.textContent =
-        data.message ||
-        "PPT 生成失敗";
-
-    }
-
-  }
-);
-
-
-/* =====================================================
-   HELPERS
-===================================================== */
-
-function addHidden(
-  form,
-  name,
-  value
-){
-
-  const input =
-    document.createElement(
-      "input"
+    URL.revokeObjectURL(
+        url
     );
-
-  input.type="hidden";
-
-  input.name=name;
-
-  input.value=value;
-
-  form.appendChild(input);
 
 }
 
