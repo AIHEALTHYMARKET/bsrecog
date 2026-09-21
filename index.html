@@ -1,1657 +1,2432 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport"
-      content="width=device-width,initial-scale=1">
+      content="width=device-width, initial-scale=1.0,
+      maximum-scale=1.0, user-scalable=no">
 
-<title>BS GLOBAL 榮耀時刻表揚</title>
-
-<script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore-compat.js"></script>
-
-<script src="./config.js"></script>
+<title>BS GLOBAL｜榮耀時刻表揚</title>
 
 <style>
 
-*{
-  box-sizing:border-box;
+* {
+    box-sizing: border-box;
 }
 
-body{
-  margin:0;
-  background:#080808;
-  color:#fff;
-  font-family:-apple-system,
-  BlinkMacSystemFont,
-  "Noto Sans TC",
-  "Microsoft JhengHei",
-  Arial,sans-serif;
+body {
+    margin: 0;
+    background:
+        radial-gradient(circle at top, #252525 0%, #0d0d0d 45%, #050505 100%);
+    color: #ffffff;
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Noto Sans TC",
+        "PingFang TC",
+        Arial,
+        sans-serif;
 }
 
-.container{
-  max-width:850px;
-  margin:auto;
-  padding:25px 15px 60px;
+.container {
+    width: 100%;
+    max-width: 760px;
+    margin: auto;
+    padding: 25px 18px 60px;
 }
 
-.hero{
-  padding:35px 5px;
+.header {
+    text-align: center;
+    margin-bottom: 28px;
 }
 
-.gold{
-  color:#D4AF37;
+.logo {
+    color: #d4af37;
+    font-size: 13px;
+    letter-spacing: 4px;
+    font-weight: 700;
+    margin-bottom: 10px;
 }
 
-.hero small{
-  color:#D4AF37;
-  letter-spacing:4px;
-  font-weight:700;
+.title {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    margin: 0;
 }
 
-.hero h1{
-  font-size:38px;
-  line-height:1.2;
-  margin:15px 0 8px;
+.subtitle {
+    color: #aaa;
+    margin-top: 8px;
+    font-size: 14px;
 }
 
-.hero p{
-  color:#888;
+.card {
+    background: rgba(20,20,20,.94);
+    border: 1px solid #333;
+    border-radius: 18px;
+    padding: 22px;
+    margin-bottom: 18px;
+    box-shadow:
+        0 15px 40px rgba(0,0,0,.35);
 }
 
-.card{
-  background:#111;
-  border:1px solid #292929;
-  border-radius:18px;
-  padding:22px;
-  margin-bottom:18px;
+.card-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 18px;
+    color: #d4af37;
 }
 
-label{
-  display:block;
-  font-weight:700;
-  margin:18px 0 8px;
+.user-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #151515;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 20px;
 }
 
-.required{
-  color:#D4AF37;
+.user-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
-input[type=text],
-select{
-  width:100%;
-  padding:13px;
-  background:#0A0A0A;
-  color:#fff;
-  border:1px solid #333;
-  border-radius:10px;
-  font-size:16px;
+.user-email {
+    font-size: 13px;
+    color: #aaa;
+    word-break: break-all;
 }
 
-button{
-  border:0;
-  border-radius:10px;
-  padding:12px 17px;
-  font-size:15px;
-  cursor:pointer;
+label {
+    display: block;
+    font-size: 14px;
+    color: #ddd;
+    margin-bottom: 7px;
 }
 
-.btn-gold{
-  background:#D4AF37;
-  color:#000;
-  font-weight:800;
+.required {
+    color: #d4af37;
 }
 
-.btn-dark{
-  background:#252525;
-  color:#fff;
+input,
+select {
+    width: 100%;
+    background: #0e0e0e;
+    color: #fff;
+    border: 1px solid #444;
+    border-radius: 10px;
+    padding: 13px 14px;
+    font-size: 15px;
+    outline: none;
 }
 
-.btn-red{
-  background:#9D2828;
-  color:#fff;
+input:focus,
+select:focus {
+    border-color: #d4af37;
 }
 
-.user{
-  padding:12px;
-  background:#171717;
-  border-radius:10px;
-  color:#aaa;
+.form-group {
+    margin-bottom: 18px;
 }
 
-.photo-box{
-  border:1px dashed #444;
-  border-radius:15px;
-  padding:20px;
-  text-align:center;
+.photo-preview {
+    width: 150px;
+    height: 150px;
+    border-radius: 14px;
+    border: 1px solid #444;
+    object-fit: cover;
+    display: none;
+    margin-top: 12px;
 }
 
-.preview{
-  max-width:180px;
-  max-height:230px;
-  border-radius:10px;
-  display:none;
-  margin:15px auto;
+.award-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 9px;
 }
 
-.awards{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
+.award-item {
+    position: relative;
 }
 
-.award{
-  background:#181818;
-  border:1px solid #292929;
-  padding:11px;
-  border-radius:9px;
-  display:flex;
-  gap:8px;
-  align-items:center;
+.award-item input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
 }
 
-.award input{
-  width:18px;
-  height:18px;
+.award-item label {
+    margin: 0;
+    border: 1px solid #444;
+    border-radius: 10px;
+    padding: 11px 10px;
+    font-size: 13px;
+    color: #bbb;
+    cursor: pointer;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    transition: .2s;
 }
 
-.record{
-  padding:16px;
-  background:#171717;
-  border:1px solid #292929;
-  border-radius:12px;
-  margin-bottom:10px;
+.award-item input:checked + label {
+    background: rgba(212,175,55,.13);
+    border-color: #d4af37;
+    color: #d4af37;
 }
 
-.record-name{
-  font-size:20px;
-  font-weight:800;
-  color:#D4AF37;
+button {
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: .2s;
 }
 
-.record-info{
-  color:#aaa;
-  margin-top:5px;
-  font-size:14px;
+.btn-gold {
+    background: linear-gradient(
+        135deg,
+        #b88a18,
+        #d4af37,
+        #f1d778
+    );
+    color: #111;
 }
 
-.status{
-  display:none;
-  padding:12px;
-  border-radius:10px;
-  margin-top:15px;
+.btn-gold:hover {
+    transform: translateY(-1px);
 }
 
-iframe{
-  display:none;
+.btn-dark {
+    background: #222;
+    color: #ddd;
+    border: 1px solid #444;
+    margin-top: 10px;
 }
 
-@media(max-width:600px){
+.btn-danger {
+    background: #321414;
+    color: #ff8f8f;
+    border: 1px solid #633;
+}
 
-  .hero h1{
-    font-size:30px;
-  }
+.status {
+    display: none;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    line-height: 1.5;
+}
 
-  .awards{
-    grid-template-columns:1fr;
-  }
+.status.success {
+    display: block;
+    background: #102b1b;
+    border: 1px solid #28633d;
+    color: #8fe0aa;
+}
 
+.status.error {
+    display: block;
+    background: #321414;
+    border: 1px solid #633;
+    color: #ff9d9d;
+}
+
+.status.info {
+    display: block;
+    background: #172333;
+    border: 1px solid #34516f;
+    color: #a8d1ff;
+}
+
+.record {
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 14px;
+    padding: 15px;
+    margin-bottom: 12px;
+}
+
+.record-name {
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.record-meta {
+    color: #999;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+.tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.tag {
+    background: rgba(212,175,55,.12);
+    border: 1px solid #705b20;
+    color: #d4af37;
+    border-radius: 20px;
+    padding: 4px 8px;
+    font-size: 11px;
+}
+
+.record-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.record-actions button {
+    width: auto;
+    flex: 1;
+    padding: 9px;
+    font-size: 13px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.login-box {
+    width: 100%;
+    max-width: 430px;
+    text-align: center;
+    background: rgba(18,18,18,.95);
+    border: 1px solid #333;
+    border-radius: 20px;
+    padding: 35px 25px;
+}
+
+.login-logo {
+    color: #d4af37;
+    font-size: 14px;
+    letter-spacing: 5px;
+    margin-bottom: 15px;
+}
+
+.login-title {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.login-description {
+    color: #999;
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 25px;
+}
+
+.loading {
+    text-align: center;
+    color: #aaa;
+    padding: 30px;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.logout {
+    width: auto;
+    padding: 8px 12px;
+    background: #222;
+    border: 1px solid #444;
+    color: #bbb;
+    font-size: 12px;
+}
+
+.admin-link {
+    display: block;
+    text-align: center;
+    color: #777;
+    font-size: 12px;
+    margin-top: 25px;
+    text-decoration: none;
+}
+
+.edit-mode {
+    color: #d4af37;
+    background: rgba(212,175,55,.08);
+    border: 1px solid #705b20;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    font-size: 13px;
+}
+
+@media(max-width:600px) {
+
+    .title {
+        font-size: 27px;
+    }
+
+    .award-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .card {
+        padding: 18px;
+    }
 }
 
 </style>
-
 </head>
 
 <body>
 
+<!-- ============================================================
+     LOGIN
+============================================================ -->
+
+<div id="loginScreen" class="login-screen">
+
+    <div class="login-box">
+
+        <div class="login-logo">
+            BS GLOBAL
+        </div>
+
+        <div class="login-title">
+            榮耀時刻表揚
+        </div>
+
+        <div class="login-description">
+            請使用你的 Google 帳號登入<br>
+            填寫突破表揚資料
+        </div>
+
+        <button
+            id="loginBtn"
+            class="btn-gold">
+            使用 Google 登入
+        </button>
+
+        <div
+            id="loginError"
+            class="status error"
+            style="margin-top:15px;">
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ============================================================
+     MAIN
+============================================================ -->
+
+<div id="mainScreen" class="hidden">
+
 <div class="container">
 
-<div class="hero">
+    <div class="topbar">
 
-<small>BS GLOBAL</small>
+        <div class="logo">
+            BS GLOBAL
+        </div>
 
-<h1>
-榮耀時刻表揚
-</h1>
+        <button
+            id="logoutBtn"
+            class="logout">
+            登出
+        </button>
 
-<p>
-Recognition Registration System
-</p>
+    </div>
+
+    <div class="header">
+
+        <h1 class="title">
+            榮耀時刻表揚
+        </h1>
+
+        <div class="subtitle">
+            Recognition Registration
+        </div>
+
+    </div>
+
+
+    <div id="statusBox" class="status"></div>
+
+
+    <!-- 使用者 -->
+
+    <div class="card">
+
+        <div class="user-box">
+
+            <img
+                id="userAvatar"
+                class="user-avatar"
+                src=""
+                alt="">
+
+            <div>
+                <div
+                    style="font-size:14px;font-weight:700;">
+                    已登入
+                </div>
+
+                <div
+                    id="userEmail"
+                    class="user-email">
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- 表單 -->
+
+    <div class="card">
+
+        <div class="card-title">
+            表揚資料
+        </div>
+
+        <div
+            id="editModeBox"
+            class="edit-mode hidden">
+            目前正在修改資料
+        </div>
+
+
+        <!-- 姓名 -->
+
+        <div class="form-group">
+
+            <label>
+                表揚者姓名
+                <span class="required">*</span>
+            </label>
+
+            <input
+                id="name"
+                type="text"
+                placeholder="請輸入表揚者姓名">
+
+        </div>
+
+
+        <!-- 職業 -->
+
+        <div class="form-group">
+
+            <label>
+                表揚者職業
+                <span class="required">*</span>
+            </label>
+
+            <input
+                id="occupation"
+                type="text"
+                placeholder="例如：企業家、設計師、房地產">
+
+        </div>
+
+
+        <!-- 白金 -->
+
+        <div class="form-group">
+
+            <label>
+                上線白金
+                <span class="required">*</span>
+            </label>
+
+            <select id="platinum">
+
+                <option value="">
+                    請選擇上線白金
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- 照片 -->
+
+        <div class="form-group">
+
+            <label>
+                表揚者照片
+                <span class="required">*</span>
+            </label>
+
+            <input
+                id="photo"
+                type="file"
+                accept="image/jpeg,image/png">
+
+            <div
+                style="font-size:12px;color:#777;margin-top:7px;">
+                建議使用正面清晰照片，系統會自動最佳化圖片。
+            </div>
+
+            <img
+                id="photoPreview"
+                class="photo-preview"
+                src=""
+                alt="照片預覽">
+
+        </div>
+
+
+        <!-- 突破獎銜 -->
+
+        <div class="form-group">
+
+            <label>
+                突破獎銜
+                <span class="required">*</span>
+            </label>
+
+            <div
+                id="awardGrid"
+                class="award-grid">
+            </div>
+
+        </div>
+
+
+        <button
+            id="submitBtn"
+            class="btn-gold">
+            提交表揚資料
+        </button>
+
+
+        <button
+            id="cancelEditBtn"
+            class="btn-dark hidden">
+            取消修改
+        </button>
+
+    </div>
+
+
+    <!-- 我的資料 -->
+
+    <div class="card">
+
+        <div class="card-title">
+            我的表揚資料
+        </div>
+
+        <div id="recordsList">
+
+            <div class="loading">
+                載入中...
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <a
+        href="admin.html"
+        class="admin-link">
+        管理員後台
+    </a>
+
+</div>
 
 </div>
 
 
-<div class="card">
+<!-- 隱藏 Apps Script iframe -->
 
-<div id="loginBox">
+<iframe
+    id="gasFrame"
+    name="gasFrame"
+    style="
+        width:0;
+        height:0;
+        border:0;
+        position:absolute;
+        left:-9999px;
+    ">
+</iframe>
 
-<button class="btn-gold"
-        onclick="login()">
-使用 Google 登入
-</button>
 
-</div>
+<script type="module">
 
+import {
+    initializeApp
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 
-<div id="userBox"
-     style="display:none">
+import {
+    getAuth,
+    GoogleAuthProvider,
+    signInWithPopup,
+    signOut,
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
-<div class="user">
+import {
+    getFirestore,
+    collection,
+    addDoc,
+    updateDoc,
+    deleteDoc,
+    doc,
+    getDoc,
+    getDocs,
+    query,
+    where,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-登入帳號：
-<span id="email"></span>
+import {
+    firebaseConfig,
+    APPS_SCRIPT_URL
+} from "./js/firebase-config.js";
 
-</div>
 
-<br>
+/* ============================================================
+   Firebase 初始化
+============================================================ */
 
-<button class="btn-dark"
-        onclick="logout()">
-登出
-</button>
+const app = initializeApp(firebaseConfig);
 
-</div>
+const auth = getAuth(app);
 
-</div>
+const db = getFirestore(app);
 
+const provider = new GoogleAuthProvider();
 
-<div id="formArea"
-     class="card"
-     style="display:none">
+provider.setCustomParameters({
+    prompt: "select_account"
+});
 
-<h2 id="formTitle">
-新增表揚者
-</h2>
 
+/* ============================================================
+   DOM
+============================================================ */
 
-<input type="hidden"
-       id="recordId">
+const loginScreen =
+    document.getElementById("loginScreen");
 
+const mainScreen =
+    document.getElementById("mainScreen");
 
-<input type="hidden"
-       id="oldPhotoId">
+const loginBtn =
+    document.getElementById("loginBtn");
 
+const logoutBtn =
+    document.getElementById("logoutBtn");
 
-<input type="hidden"
-       id="photoId">
+const loginError =
+    document.getElementById("loginError");
 
+const statusBox =
+    document.getElementById("statusBox");
 
-<input type="hidden"
-       id="photoName">
+const submitBtn =
+    document.getElementById("submitBtn");
 
+const cancelEditBtn =
+    document.getElementById("cancelEditBtn");
 
-<label>
-表揚者姓名
-<span class="required">*</span>
-</label>
+const editModeBox =
+    document.getElementById("editModeBox");
 
-<input type="text"
-       id="name"
-       placeholder="請輸入姓名">
+const recordsList =
+    document.getElementById("recordsList");
 
+const photoInput =
+    document.getElementById("photo");
 
-<label>
-表揚者職業
-<span class="required">*</span>
-</label>
+const photoPreview =
+    document.getElementById("photoPreview");
 
-<input type="text"
-       id="occupation"
-       placeholder="請輸入職業">
+const nameInput =
+    document.getElementById("name");
 
+const occupationInput =
+    document.getElementById("occupation");
 
-<label>
-表揚者照片
-<span class="required">*</span>
-</label>
+const platinumSelect =
+    document.getElementById("platinum");
 
-<div class="photo-box">
+const awardGrid =
+    document.getElementById("awardGrid");
 
-<img id="preview"
-     class="preview">
 
-<div id="photoLabel">
-尚未選擇照片
-</div>
-
-<br>
-
-<input type="file"
-       id="photoInput"
-       accept="image/jpeg,image/jpg,image/png">
-
-<br><br>
-
-<button class="btn-dark"
-        onclick="uploadPhoto()">
-上傳照片
-</button>
-
-</div>
-
-
-<label>
-上線白金
-<span class="required">*</span>
-</label>
-
-<select id="upline">
-
-<option value="">
-請選擇上線白金
-</option>
-
-</select>
-
-
-<label>
-突破獎銜
-<span class="required">*</span>
-</label>
-
-<div id="awards"
-     class="awards">
-</div>
-
-
-<br>
-
-<button class="btn-gold"
-        id="saveButton"
-        onclick="saveRecord()">
-保存表揚資料
-</button>
-
-<button class="btn-dark"
-        onclick="resetForm()">
-清空
-</button>
-
-
-<div id="status"
-     class="status">
-</div>
-
-</div>
-
-
-<div id="recordsArea"
-     class="card"
-     style="display:none">
-
-<h2>
-我的表揚資料
-</h2>
-
-<div id="records">
-</div>
-
-<button class="btn-gold"
-        onclick="newRecord()">
-＋ 填寫下一位
-</button>
-
-</div>
-
-
-<iframe id="backendFrame"
-        name="backendFrame"></iframe>
-
-
-</div>
-
-
-<script>
-
-firebase.initializeApp(CONFIG.firebase);
-
-const auth =
-  firebase.auth();
-
-const db =
-  firebase.firestore();
-
+/* ============================================================
+   狀態
+============================================================ */
 
 let currentUser = null;
 
-let records = [];
+let currentRecords = [];
 
-let pendingUpload = null;
+let editingId = null;
+
+let editingOldPhotoId = null;
+
+let currentSettings = {
+    platinumList: [],
+    awardList: []
+};
 
 
-/* =====================================================
-   LOGIN
-===================================================== */
+/* ============================================================
+   防止 Google Popup 重複開啟
+============================================================ */
 
-async function login(){
+let loginInProgress = false;
 
-  const provider =
-    new firebase.auth.GoogleAuthProvider();
 
-  try{
+/* ============================================================
+   預設資料
+============================================================ */
 
-    await auth.signInWithPopup(
-      provider
-    );
+const DEFAULT_PLATINUMS = [
 
-  }catch(error){
+    "Sense&Lavenier",
+    "Amos",
+    "Sunny",
+    "Robin&Zoey",
+    "RyanLio",
+    "Wyane&Momo",
+    "Jess",
+    "SzeChew",
+    "Lynn",
+    "Keong&Ngah"
 
-    alert(
-      "Google 登入失敗：\n" +
-      error.message
-    );
+];
 
-  }
+
+const DEFAULT_AWARDS = [
+
+    "Silver Inner Circle",
+    "Gold Inner Circle",
+    "100% User",
+    "100ppv",
+    "3%",
+    "300ppv",
+    "600ppv",
+    "6%",
+    "1000ppv",
+    "9%",
+    "12%",
+    "Bronze Foundation",
+    "15%",
+    "18%",
+    "Bronze Builder",
+    "Core",
+    "Super core",
+    "Silver producer",
+    "Gold producer",
+    "Platinum",
+    "Founder Platinum"
+
+];
+
+
+/* ============================================================
+   HTML Escape
+============================================================ */
+
+function escapeHtml(value) {
+
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 
 }
 
 
-async function logout(){
+/* ============================================================
+   顯示訊息
+============================================================ */
 
-  await auth.signOut();
+function showStatus(message, type = "info") {
+
+    statusBox.className =
+        "status " + type;
+
+    statusBox.textContent =
+        message;
 
 }
 
 
-auth.onAuthStateChanged(
-  async user => {
+/* ============================================================
+   清除訊息
+============================================================ */
 
-    currentUser=user;
+function clearStatus() {
 
-    if(!user){
+    statusBox.className = "status";
 
-      document.getElementById(
-        "loginBox"
-      ).style.display="block";
+    statusBox.textContent = "";
 
-      document.getElementById(
-        "userBox"
-      ).style.display="none";
+}
 
-      document.getElementById(
-        "formArea"
-      ).style.display="none";
 
-      document.getElementById(
-        "recordsArea"
-      ).style.display="none";
+/* ============================================================
+   Google Login
+============================================================ */
 
-      return;
+async function loginWithGoogle() {
+
+    if (loginInProgress) {
+        return;
+    }
+
+    if (auth.currentUser) {
+        return;
+    }
+
+    loginInProgress = true;
+
+    loginBtn.disabled = true;
+
+    loginBtn.textContent =
+        "Google 登入中...";
+
+    loginError.className =
+        "status";
+
+    loginError.textContent = "";
+
+    try {
+
+        await signInWithPopup(
+            auth,
+            provider
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Google Login Error:",
+            error
+        );
+
+        if (
+            error.code ===
+            "auth/cancelled-popup-request"
+        ) {
+
+            loginError.className =
+                "status error";
+
+            loginError.textContent =
+                "Google 登入視窗正在處理中，請不要重複點擊登入按鈕。";
+
+        } else if (
+            error.code ===
+            "auth/popup-closed-by-user"
+        ) {
+
+            loginError.className =
+                "status error";
+
+            loginError.textContent =
+                "Google 登入視窗已關閉，請重新點擊登入。";
+
+        } else {
+
+            loginError.className =
+                "status error";
+
+            loginError.textContent =
+                "Google 登入失敗：" +
+                (error.message || error.code);
+
+        }
+
+    } finally {
+
+        setTimeout(() => {
+
+            loginInProgress = false;
+
+            loginBtn.disabled = false;
+
+            loginBtn.textContent =
+                "使用 Google 登入";
+
+        }, 800);
 
     }
 
-
-    document.getElementById(
-      "loginBox"
-    ).style.display="none";
+}
 
 
-    document.getElementById(
-      "userBox"
-    ).style.display="block";
-
-
-    document.getElementById(
-      "formArea"
-    ).style.display="block";
-
-
-    document.getElementById(
-      "recordsArea"
-    ).style.display="block";
-
-
-    document.getElementById(
-      "email"
-    ).textContent=user.email;
-
-
-    renderSettings();
-
-    await loadRecords();
-
-  }
+loginBtn.addEventListener(
+    "click",
+    loginWithGoogle
 );
 
 
-/* =====================================================
-   SETTINGS
-===================================================== */
+/* ============================================================
+   登出
+============================================================ */
 
-function renderSettings(){
+logoutBtn.addEventListener(
+    "click",
+    async () => {
 
-  const upline =
-    document.getElementById(
-      "upline"
-    );
-
-  upline.innerHTML =
-    `<option value="">
-      請選擇上線白金
-    </option>`;
-
-
-  CONFIG.uplines.forEach(
-    name => {
-
-      const option =
-        document.createElement(
-          "option"
-        );
-
-      option.value=name;
-      option.textContent=name;
-
-      upline.appendChild(
-        option
-      );
+        await signOut(auth);
 
     }
-  );
+);
 
 
-  const box =
-    document.getElementById(
-      "awards"
-    );
+/* ============================================================
+   Auth 狀態
+============================================================ */
 
-  box.innerHTML="";
+onAuthStateChanged(
+    auth,
+    async (user) => {
+
+        currentUser = user;
+
+        if (!user) {
+
+            mainScreen.classList.add(
+                "hidden"
+            );
+
+            loginScreen.classList.remove(
+                "hidden"
+            );
+
+            return;
+
+        }
 
 
-  CONFIG.awards.forEach(
-    award => {
-
-      const label =
-        document.createElement(
-          "label"
+        loginScreen.classList.add(
+            "hidden"
         );
 
-      label.className="award";
-
-
-      const input =
-        document.createElement(
-          "input"
+        mainScreen.classList.remove(
+            "hidden"
         );
 
-      input.type="checkbox";
 
-      input.value=award;
-
-      input.className=
-        "awardCheck";
-
-
-      const span =
-        document.createElement(
-          "span"
-        );
-
-      span.textContent=award;
+        document.getElementById(
+            "userEmail"
+        ).textContent =
+            user.email || "";
 
 
-      label.appendChild(input);
+        document.getElementById(
+            "userAvatar"
+        ).src =
+            user.photoURL ||
+            "https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg";
 
-      label.appendChild(span);
 
-      box.appendChild(label);
+        await loadSettings();
+
+        await loadMyRecords();
 
     }
-  );
+);
+
+
+/* ============================================================
+   載入設定
+============================================================ */
+
+async function loadSettings() {
+
+    try {
+
+        const ref =
+            doc(
+                db,
+                "settings",
+                "config"
+            );
+
+        const snap =
+            await getDoc(ref);
+
+
+        if (snap.exists()) {
+
+            const data = snap.data();
+
+            currentSettings = {
+
+                platinumList:
+                    Array.isArray(data.platinumList)
+                        ? data.platinumList
+                        : DEFAULT_PLATINUMS,
+
+                awardList:
+                    Array.isArray(data.awardList)
+                        ? data.awardList
+                        : DEFAULT_AWARDS
+
+            };
+
+        } else {
+
+            currentSettings = {
+
+                platinumList:
+                    DEFAULT_PLATINUMS,
+
+                awardList:
+                    DEFAULT_AWARDS
+
+            };
+
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+        currentSettings = {
+
+            platinumList:
+                DEFAULT_PLATINUMS,
+
+            awardList:
+                DEFAULT_AWARDS
+
+        };
+
+    }
+
+
+    renderPlatinumList();
+
+    renderAwardList();
 
 }
 
 
-/* =====================================================
-   UPLOAD PHOTO
-===================================================== */
+/* ============================================================
+   白金列表
+============================================================ */
 
-async function uploadPhoto(){
+function renderPlatinumList() {
 
-  if(!currentUser){
+    platinumSelect.innerHTML = `
+        <option value="">
+            請選擇上線白金
+        </option>
+    `;
 
-    alert("請先登入");
+    currentSettings.platinumList
+        .forEach(name => {
 
-    return;
+            const option =
+                document.createElement(
+                    "option"
+                );
 
-  }
+            option.value = name;
+
+            option.textContent = name;
+
+            platinumSelect.appendChild(
+                option
+            );
+
+        });
+
+}
 
 
-  const input =
-    document.getElementById(
-      "photoInput"
+/* ============================================================
+   獎銜列表
+============================================================ */
+
+function renderAwardList() {
+
+    awardGrid.innerHTML = "";
+
+    currentSettings.awardList
+        .forEach(
+            (award, index) => {
+
+                const wrapper =
+                    document.createElement(
+                        "div"
+                    );
+
+                wrapper.className =
+                    "award-item";
+
+                const id =
+                    "award_" + index;
+
+                wrapper.innerHTML = `
+
+                    <input
+                        type="checkbox"
+                        id="${id}"
+                        value="${escapeHtml(award)}"
+                    >
+
+                    <label for="${id}">
+                        ${escapeHtml(award)}
+                    </label>
+
+                `;
+
+                awardGrid.appendChild(
+                    wrapper
+                );
+
+            }
+        );
+
+}
+
+
+/* ============================================================
+   取得選中的獎銜
+============================================================ */
+
+function getSelectedAwards() {
+
+    return Array.from(
+        awardGrid.querySelectorAll(
+            "input[type=checkbox]:checked"
+        )
+    ).map(
+        checkbox =>
+            checkbox.value
     );
 
-
-  if(!input.files.length){
-
-    alert("請選擇照片");
-
-    return;
-
-  }
+}
 
 
-  const file =
-    input.files[0];
+/* ============================================================
+   清除表單
+============================================================ */
+
+function resetForm() {
+
+    editingId = null;
+
+    editingOldPhotoId = null;
+
+    nameInput.value = "";
+
+    occupationInput.value = "";
+
+    platinumSelect.value = "";
+
+    photoInput.value = "";
+
+    photoPreview.src = "";
+
+    photoPreview.style.display =
+        "none";
 
 
-  if(
-    ![
-      "image/jpeg",
-      "image/jpg",
-      "image/png"
-    ].includes(file.type)
-  ){
+    awardGrid
+        .querySelectorAll(
+            "input[type=checkbox]"
+        )
+        .forEach(
+            checkbox =>
+                checkbox.checked = false
+        );
 
-    alert(
-      "只接受 JPG / JPEG / PNG"
+
+    editModeBox.classList.add(
+        "hidden"
     );
 
-    return;
-
-  }
-
-
-  if(
-    file.size > 5 * 1024 * 1024
-  ){
-
-    alert(
-      "照片不能超過 5MB"
+    cancelEditBtn.classList.add(
+        "hidden"
     );
 
-    return;
+    submitBtn.textContent =
+        "提交表揚資料";
 
-  }
-
-
-  showStatus(
-    "照片上傳中...",
-    false
-  );
+}
 
 
-  try{
+/* ============================================================
+   圖片壓縮
+============================================================ */
+
+async function prepareImage(file) {
+
+    return new Promise(
+        (resolve, reject) => {
+
+            const url =
+                URL.createObjectURL(file);
+
+            const img =
+                new Image();
+
+            img.onload = () => {
+
+                URL.revokeObjectURL(url);
+
+
+                const maxSize = 1400;
+
+                let width =
+                    img.naturalWidth;
+
+                let height =
+                    img.naturalHeight;
+
+
+                if (
+                    width > maxSize ||
+                    height > maxSize
+                ) {
+
+                    const scale =
+                        Math.min(
+                            maxSize / width,
+                            maxSize / height
+                        );
+
+                    width =
+                        Math.round(
+                            width * scale
+                        );
+
+                    height =
+                        Math.round(
+                            height * scale
+                        );
+
+                }
+
+
+                const canvas =
+                    document.createElement(
+                        "canvas"
+                    );
+
+                canvas.width =
+                    width;
+
+                canvas.height =
+                    height;
+
+
+                const ctx =
+                    canvas.getContext(
+                        "2d"
+                    );
+
+                ctx.drawImage(
+                    img,
+                    0,
+                    0,
+                    width,
+                    height
+                );
+
+
+                canvas.toBlob(
+                    blob => {
+
+                        if (!blob) {
+
+                            reject(
+                                new Error(
+                                    "圖片處理失敗"
+                                )
+                            );
+
+                            return;
+
+                        }
+
+                        resolve(blob);
+
+                    },
+                    "image/jpeg",
+                    0.86
+                );
+
+            };
+
+
+            img.onerror = () => {
+
+                URL.revokeObjectURL(url);
+
+                reject(
+                    new Error(
+                        "無法讀取照片"
+                    )
+                );
+
+            };
+
+
+            img.src = url;
+
+        }
+    );
+
+}
+
+
+/* ============================================================
+   Blob → Base64
+============================================================ */
+
+function blobToBase64(blob) {
+
+    return new Promise(
+        (resolve, reject) => {
+
+            const reader =
+                new FileReader();
+
+            reader.onloadend = () => {
+
+                const result =
+                    reader.result;
+
+                resolve(
+                    result.split(",")[1]
+                );
+
+            };
+
+            reader.onerror =
+                reject;
+
+            reader.readAsDataURL(
+                blob
+            );
+
+        }
+    );
+
+}
+
+
+/* ============================================================
+   Apps Script POST
+============================================================ */
+
+function postToAppsScript(
+    fields
+) {
+
+    return new Promise(
+        (resolve, reject) => {
+
+            const callbackTimeout =
+                setTimeout(
+                    () => {
+
+                        window.removeEventListener(
+                            "message",
+                            listener
+                        );
+
+                        reject(
+                            new Error(
+                                "Google Drive 服務逾時，請稍後再試。"
+                            )
+                        );
+
+                    },
+                    90000
+                );
+
+
+            function listener(event) {
+
+                const data =
+                    event.data;
+
+                if (
+                    !data ||
+                    data.source !==
+                        "BS_GLOBAL"
+                ) {
+
+                    return;
+
+                }
+
+
+                clearTimeout(
+                    callbackTimeout
+                );
+
+                window.removeEventListener(
+                    "message",
+                    listener
+                );
+
+
+                if (
+                    data.success
+                ) {
+
+                    resolve(
+                        data.result
+                    );
+
+                } else {
+
+                    reject(
+                        new Error(
+                            data.error ||
+                            "Apps Script 執行失敗"
+                        )
+                    );
+
+                }
+
+            }
+
+
+            window.addEventListener(
+                "message",
+                listener
+            );
+
+
+            const form =
+                document.createElement(
+                    "form"
+                );
+
+            form.method = "POST";
+
+            form.action =
+                APPS_SCRIPT_URL;
+
+            form.target =
+                "gasFrame";
+
+            form.style.display =
+                "none";
+
+
+            Object.entries(fields)
+                .forEach(
+                    ([key, value]) => {
+
+                        const input =
+                            document.createElement(
+                                "input"
+                            );
+
+                        input.type =
+                            "hidden";
+
+                        input.name =
+                            key;
+
+                        input.value =
+                            value ?? "";
+
+                        form.appendChild(
+                            input
+                        );
+
+                    }
+                );
+
+
+            document.body.appendChild(
+                form
+            );
+
+            form.submit();
+
+
+            setTimeout(
+                () => {
+
+                    form.remove();
+
+                },
+                3000
+            );
+
+        }
+    );
+
+}
+
+
+/* ============================================================
+   上傳照片
+============================================================ */
+
+async function uploadPhoto(
+    file
+) {
+
+    const compressed =
+        await prepareImage(file);
 
     const base64 =
-      await fileToBase64(file);
+        await blobToBase64(
+            compressed
+        );
 
 
     const token =
-      await currentUser.getIdToken(
-        true
-      );
-
-
-    const form =
-      createBackendForm();
-
-
-    form.innerHTML="";
-
-
-    addHidden(
-      form,
-      "action",
-      "uploadPhoto"
-    );
-
-    addHidden(
-      form,
-      "idToken",
-      token
-    );
-
-    addHidden(
-      form,
-      "base64",
-      base64
-    );
-
-    addHidden(
-      form,
-      "mimeType",
-      file.type
-    );
-
-    addHidden(
-      form,
-      "fileName",
-      file.name
-    );
-
-
-    pendingUpload=true;
-
-
-    document.body.appendChild(
-      form
-    );
-
-    form.submit();
-
-
-  }catch(error){
-
-    showStatus(
-      "照片處理失敗：" +
-      error.message,
-      true
-    );
-
-  }
-
-}
-
-
-function fileToBase64(file){
-
-  return new Promise(
-    (resolve,reject)=>{
-
-      const reader =
-        new FileReader();
-
-
-      reader.onload=()=>{
-        const result =
-          reader.result;
-
-        resolve(
-          result.split(",")[1]
-        );
-      };
-
-
-      reader.onerror=reject;
-
-      reader.readAsDataURL(file);
-
-    }
-  );
-
-}
-
-
-/* =====================================================
-   BACKEND FORM
-===================================================== */
-
-function createBackendForm(){
-
-  const form =
-    document.createElement(
-      "form"
-    );
-
-  form.method="POST";
-
-  form.action=
-    CONFIG.appsScriptUrl;
-
-  form.target="backendFrame";
-
-  form.style.display="none";
-
-  return form;
-
-}
-
-
-function addHidden(
-  form,
-  name,
-  value
-){
-
-  const input =
-    document.createElement(
-      "input"
-    );
-
-  input.type="hidden";
-
-  input.name=name;
-
-  input.value=value;
-
-  form.appendChild(input);
-
-}
-
-
-/* =====================================================
-   RECEIVE APPS SCRIPT
-===================================================== */
-
-window.addEventListener(
-  "message",
-  async event => {
-
-    let data;
-
-
-    try{
-
-      if(
-        typeof event.data ===
-        "string"
-      ){
-
-        data =
-          JSON.parse(
-            event.data
-          );
-
-      }else{
-
-        data=event.data;
-
-      }
-
-    }catch(e){
-
-      return;
-
-    }
-
-
-    if(!data){
-      return;
-    }
-
-
-    if(data.success){
-
-      if(
-        data.fileId &&
-        data.fileName
-      ){
-
-        document.getElementById(
-          "photoId"
-        ).value=data.fileId;
-
-        document.getElementById(
-          "photoName"
-        ).value=data.fileName;
-
-
-        document.getElementById(
-          "photoLabel"
-        ).textContent=
-          data.fileName;
-
-
-        const preview =
-          document.getElementById(
-            "preview"
-          );
-
-
-        preview.src =
-          "https://drive.google.com/thumbnail?id=" +
-          encodeURIComponent(
-            data.fileId
-          ) +
-          "&sz=w600";
-
-
-        preview.style.display=
-          "block";
-
-
-        showStatus(
-          "照片上傳成功。",
-          false
+        await currentUser.getIdToken(
+            true
         );
 
-      }
 
-    }else{
+    const result =
+        await postToAppsScript({
 
-      showStatus(
-        data.message ||
-        "操作失敗",
-        true
-      );
+            action:
+                "uploadPhoto",
 
+            idToken:
+                token,
+
+            fileName:
+                file.name,
+
+            mimeType:
+                "image/jpeg",
+
+            base64:
+                base64
+
+        });
+
+
+    return result;
+
+}
+
+
+/* ============================================================
+   刪除照片
+============================================================ */
+
+async function deletePhoto(
+    fileId
+) {
+
+    if (!fileId) {
+        return;
     }
 
-  }
+
+    const token =
+        await currentUser.getIdToken(
+            true
+        );
+
+
+    return postToAppsScript({
+
+        action:
+            "deletePhoto",
+
+        idToken:
+            token,
+
+        fileId:
+            fileId
+
+    });
+
+}
+
+
+/* ============================================================
+   提交
+============================================================ */
+
+submitBtn.addEventListener(
+    "click",
+    async () => {
+
+        clearStatus();
+
+
+        if (!currentUser) {
+
+            showStatus(
+                "請先登入 Google。",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        const name =
+            nameInput.value.trim();
+
+        const occupation =
+            occupationInput.value.trim();
+
+        const platinum =
+            platinumSelect.value;
+
+        const awards =
+            getSelectedAwards();
+
+        const photoFile =
+            photoInput.files[0];
+
+
+        if (!name) {
+
+            showStatus(
+                "請輸入表揚者姓名。",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        if (!occupation) {
+
+            showStatus(
+                "請輸入表揚者職業。",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        if (!platinum) {
+
+            showStatus(
+                "請選擇上線白金。",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        if (!awards.length) {
+
+            showStatus(
+                "至少選擇一個突破獎銜。",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        if (
+            !editingId &&
+            !photoFile
+        ) {
+
+            showStatus(
+                "請上傳表揚者照片。",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        submitBtn.disabled = true;
+
+        submitBtn.textContent =
+            "資料處理中...";
+
+
+        let newPhoto = null;
+
+
+        try {
+
+            /* =================================================
+               如果有新照片 → 上傳
+            ================================================= */
+
+            if (photoFile) {
+
+                showStatus(
+                    "正在上傳及最佳化照片...",
+                    "info"
+                );
+
+
+                newPhoto =
+                    await uploadPhoto(
+                        photoFile
+                    );
+
+            }
+
+
+            const data = {
+
+                uid:
+                    currentUser.uid,
+
+                email:
+                    currentUser.email,
+
+                name:
+                    name,
+
+                occupation:
+                    occupation,
+
+                platinum:
+                    platinum,
+
+                awards:
+                    awards,
+
+                updatedAt:
+                    serverTimestamp()
+
+            };
+
+
+            if (newPhoto) {
+
+                data.photoFileId =
+                    newPhoto.fileId;
+
+                data.photoFileName =
+                    newPhoto.fileName;
+
+                data.photoDriveUrl =
+                    newPhoto.driveUrl;
+
+            }
+
+
+            /* =================================================
+               新增
+            ================================================= */
+
+            if (!editingId) {
+
+                data.createdAt =
+                    serverTimestamp();
+
+
+                try {
+
+                    await addDoc(
+                        collection(
+                            db,
+                            "recognitions"
+                        ),
+                        data
+                    );
+
+                } catch (firestoreError) {
+
+                    if (
+                        newPhoto &&
+                        newPhoto.fileId
+                    ) {
+
+                        try {
+
+                            await deletePhoto(
+                                newPhoto.fileId
+                            );
+
+                        } catch (_) {}
+
+                    }
+
+                    throw firestoreError;
+
+                }
+
+
+                showStatus(
+                    "表揚資料提交成功！",
+                    "success"
+                );
+
+            }
+
+            /* =================================================
+               修改
+            ================================================= */
+
+            else {
+
+                const oldPhotoId =
+                    editingOldPhotoId;
+
+
+                const updateData =
+                    { ...data };
+
+
+                await updateDoc(
+                    doc(
+                        db,
+                        "recognitions",
+                        editingId
+                    ),
+                    updateData
+                );
+
+
+                /* =============================================
+                   Firestore 成功後才刪除舊照片
+                ============================================= */
+
+                if (
+                    newPhoto &&
+                    oldPhotoId &&
+                    oldPhotoId !==
+                        newPhoto.fileId
+                ) {
+
+                    try {
+
+                        await deletePhoto(
+                            oldPhotoId
+                        );
+
+                    } catch (deleteError) {
+
+                        console.warn(
+                            "舊照片刪除失敗：",
+                            deleteError
+                        );
+
+                    }
+
+                }
+
+
+                showStatus(
+                    "表揚資料修改成功！",
+                    "success"
+                );
+
+            }
+
+
+            resetForm();
+
+            await loadMyRecords();
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            if (
+                newPhoto &&
+                newPhoto.fileId
+            ) {
+
+                try {
+
+                    await deletePhoto(
+                        newPhoto.fileId
+                    );
+
+                } catch (_) {}
+
+            }
+
+
+            showStatus(
+                "提交失敗：" +
+                (error.message ||
+                    error),
+                "error"
+            );
+
+        } finally {
+
+            submitBtn.disabled =
+                false;
+
+            submitBtn.textContent =
+                editingId
+                    ? "儲存修改"
+                    : "提交表揚資料";
+
+        }
+
+    }
 );
 
 
-/* =====================================================
-   SAVE
-===================================================== */
+/* ============================================================
+   載入自己的資料
+============================================================ */
 
-async function saveRecord(){
+async function loadMyRecords() {
 
-  if(!currentUser){
-
-    alert("請先登入");
-
-    return;
-
-  }
-
-
-  const name =
-    document.getElementById(
-      "name"
-    ).value.trim();
-
-
-  const occupation =
-    document.getElementById(
-      "occupation"
-    ).value.trim();
-
-
-  const upline =
-    document.getElementById(
-      "upline"
-    ).value;
-
-
-  const photoId =
-    document.getElementById(
-      "photoId"
-    ).value;
-
-
-  const photoName =
-    document.getElementById(
-      "photoName"
-    ).value;
-
-
-  const recordId =
-    document.getElementById(
-      "recordId"
-    ).value;
-
-
-  const oldPhotoId =
-    document.getElementById(
-      "oldPhotoId"
-    ).value;
-
-
-  const awards =
-    Array.from(
-      document.querySelectorAll(
-        ".awardCheck:checked"
-      )
-    ).map(
-      el => el.value
-    );
-
-
-  if(!name){
-
-    alert("請填寫表揚者姓名");
-
-    return;
-
-  }
-
-
-  if(!occupation){
-
-    alert("請填寫表揚者職業");
-
-    return;
-
-  }
-
-
-  if(!photoId){
-
-    alert("請上傳表揚者照片");
-
-    return;
-
-  }
-
-
-  if(!upline){
-
-    alert("請選擇上線白金");
-
-    return;
-
-  }
-
-
-  if(!awards.length){
-
-    alert(
-      "至少選擇一個突破獎銜"
-    );
-
-    return;
-
-  }
-
-
-  const data={
-
-    name:name,
-
-    occupation:occupation,
-
-    photoFileId:photoId,
-
-    photoFileName:photoName,
-
-    photoDriveUrl:
-      "https://drive.google.com/file/d/" +
-      photoId +
-      "/view",
-
-    upline:upline,
-
-    awards:awards,
-
-    ownerUid:
-      currentUser.uid,
-
-    ownerEmail:
-      currentUser.email,
-
-    updatedAt:
-      firebase.firestore.FieldValue
-        .serverTimestamp()
-
-  };
-
-
-  try{
-
-    if(recordId){
-
-      await db.collection(
-        "records"
-      )
-      .doc(recordId)
-      .update(data);
-
-    }else{
-
-      data.createdAt =
-        firebase.firestore.FieldValue
-          .serverTimestamp();
-
-
-      await db.collection(
-        "records"
-      )
-      .add(data);
-
+    if (!currentUser) {
+        return;
     }
 
 
-    /*
-      Firestore 已成功保存新照片後，
-      才刪除舊照片。
-    */
+    recordsList.innerHTML = `
+        <div class="loading">
+            載入資料中...
+        </div>
+    `;
 
-    if(
-      oldPhotoId &&
-      oldPhotoId !== photoId
-    ){
 
-      deleteOldPhoto(
-        oldPhotoId
-      );
+    try {
 
-    }
+        const q =
+            query(
+                collection(
+                    db,
+                    "recognitions"
+                ),
+                where(
+                    "uid",
+                    "==",
+                    currentUser.uid
+                )
+            );
 
 
-    showStatus(
-      "保存成功。",
-      false
-    );
+        const snapshot =
+            await getDocs(q);
 
 
-    resetForm();
+        currentRecords =
+            snapshot.docs.map(
+                docSnap => ({
 
-    await loadRecords();
+                    id:
+                        docSnap.id,
 
+                    ...docSnap.data()
 
-  }catch(error){
+                })
+            );
 
-    showStatus(
-      "保存失敗：" +
-      error.message,
-      true
-    );
 
-  }
+        currentRecords.sort(
+            (a, b) => {
 
-}
+                const aTime =
+                    a.createdAt?.seconds ||
+                    0;
 
+                const bTime =
+                    b.createdAt?.seconds ||
+                    0;
 
-/* =====================================================
-   DELETE OLD PHOTO
-===================================================== */
+                return bTime - aTime;
 
-async function deleteOldPhoto(
-  fileId
-){
-
-  try{
-
-    const token =
-      await currentUser.getIdToken(
-        true
-      );
-
-
-    const form =
-      createBackendForm();
-
-
-    addHidden(
-      form,
-      "action",
-      "deletePhoto"
-    );
-
-
-    addHidden(
-      form,
-      "idToken",
-      token
-    );
-
-
-    addHidden(
-      form,
-      "fileId",
-      fileId
-    );
-
-
-    document.body.appendChild(
-      form
-    );
-
-
-    form.submit();
-
-  }catch(error){
-
-    console.warn(
-      "舊照片刪除失敗",
-      error
-    );
-
-  }
-
-}
-
-
-/* =====================================================
-   LOAD MY RECORDS
-===================================================== */
-
-async function loadRecords(){
-
-  if(!currentUser){
-    return;
-  }
-
-
-  const snapshot =
-    await db.collection(
-      "records"
-    )
-    .where(
-      "ownerUid",
-      "==",
-      currentUser.uid
-    )
-    .orderBy(
-      "updatedAt",
-      "desc"
-    )
-    .get();
-
-
-  records=[];
-
-
-  snapshot.forEach(
-    doc => {
-
-      records.push({
-
-        id:doc.id,
-
-        ...doc.data()
-
-      });
-
-    }
-  );
-
-
-  renderRecords();
-
-}
-
-
-function renderRecords(){
-
-  const box =
-    document.getElementById(
-      "records"
-    );
-
-  box.innerHTML="";
-
-
-  if(!records.length){
-
-    box.innerHTML=
-      `<p style="color:#777">
-        尚未填寫任何表揚資料。
-      </p>`;
-
-    return;
-
-  }
-
-
-  records.forEach(
-    record => {
-
-      const div =
-        document.createElement(
-          "div"
+            }
         );
 
-      div.className="record";
+
+        renderRecords();
 
 
-      const name =
-        document.createElement(
-          "div"
-        );
+    } catch (error) {
 
-      name.className=
-        "record-name";
+        console.error(error);
 
-      name.textContent=
-        record.name;
-
-
-      const info =
-        document.createElement(
-          "div"
-        );
-
-      info.className=
-        "record-info";
-
-      info.textContent=
-        "職業：" +
-        record.occupation +
-        "　｜　上線：" +
-        record.upline;
-
-
-      const awards =
-        document.createElement(
-          "div"
-        );
-
-      awards.className=
-        "record-info";
-
-      awards.textContent=
-        "獎銜：" +
-        (record.awards || [])
-          .join("、");
-
-
-      const edit =
-        document.createElement(
-          "button"
-        );
-
-      edit.className=
-        "btn-dark";
-
-      edit.textContent="修改";
-
-      edit.onclick=()=>{
-        editRecord(record);
-      };
-
-
-      const del =
-        document.createElement(
-          "button"
-        );
-
-      del.className=
-        "btn-red";
-
-      del.textContent="刪除";
-
-      del.onclick=()=>{
-        deleteRecord(record);
-      };
-
-
-      div.appendChild(name);
-
-      div.appendChild(info);
-
-      div.appendChild(awards);
-
-      div.appendChild(
-        document.createElement("br")
-      );
-
-      div.appendChild(edit);
-
-      div.appendChild(del);
-
-
-      box.appendChild(div);
+        recordsList.innerHTML = `
+            <div class="status error">
+                無法讀取資料：${escapeHtml(
+                    error.message
+                )}
+            </div>
+        `;
 
     }
-  );
 
 }
 
 
-/* =====================================================
-   EDIT
-===================================================== */
+/* ============================================================
+   Render Records
+============================================================ */
 
-function editRecord(record){
+function renderRecords() {
 
-  document.getElementById(
-    "recordId"
-  ).value=record.id;
+    if (!currentRecords.length) {
 
+        recordsList.innerHTML = `
+            <div
+                style="
+                    color:#777;
+                    text-align:center;
+                    padding:25px;
+                ">
+                目前還沒有表揚資料
+            </div>
+        `;
 
-  document.getElementById(
-    "oldPhotoId"
-  ).value=
-    record.photoFileId || "";
-
-
-  document.getElementById(
-    "photoId"
-  ).value=
-    record.photoFileId || "";
-
-
-  document.getElementById(
-    "photoName"
-  ).value=
-    record.photoFileName || "";
-
-
-  document.getElementById(
-    "name"
-  ).value=
-    record.name || "";
-
-
-  document.getElementById(
-    "occupation"
-  ).value=
-    record.occupation || "";
-
-
-  document.getElementById(
-    "upline"
-  ).value=
-    record.upline || "";
-
-
-  document.getElementById(
-    "photoLabel"
-  ).textContent=
-    record.photoFileName ||
-    "已上傳照片";
-
-
-  if(record.photoFileId){
-
-    const preview =
-      document.getElementById(
-        "preview"
-      );
-
-
-    preview.src =
-      "https://drive.google.com/thumbnail?id=" +
-      encodeURIComponent(
-        record.photoFileId
-      ) +
-      "&sz=w600";
-
-
-    preview.style.display=
-      "block";
-
-  }
-
-
-  document.querySelectorAll(
-    ".awardCheck"
-  ).forEach(
-    checkbox => {
-
-      checkbox.checked =
-        (record.awards || [])
-          .includes(
-            checkbox.value
-          );
-
-    }
-  );
-
-
-  document.getElementById(
-    "formTitle"
-  ).textContent=
-    "修改表揚者";
-
-
-  window.scrollTo({
-    top:300,
-    behavior:"smooth"
-  });
-
-}
-
-
-/* =====================================================
-   DELETE
-===================================================== */
-
-async function deleteRecord(record){
-
-  if(
-    !confirm(
-      "確定刪除「" +
-      record.name +
-      "」？"
-    )
-  ){
-    return;
-  }
-
-
-  try{
-
-    await db.collection(
-      "records"
-    )
-    .doc(record.id)
-    .delete();
-
-
-    if(record.photoFileId){
-
-      await deleteOldPhoto(
-        record.photoFileId
-      );
+        return;
 
     }
 
 
-    await loadRecords();
+    recordsList.innerHTML =
+        currentRecords
+            .map(record => {
+
+                const awards =
+                    Array.isArray(
+                        record.awards
+                    )
+                        ? record.awards
+                        : [];
 
 
-  }catch(error){
+                const tags =
+                    awards
+                        .map(
+                            award =>
+                                `<span class="tag">
+                                    ${escapeHtml(
+                                        award
+                                    )}
+                                </span>`
+                        )
+                        .join("");
 
-    alert(
-      "刪除失敗：\n" +
-      error.message
-    );
 
-  }
+                return `
+
+                    <div class="record">
+
+                        <div class="record-name">
+                            ${escapeHtml(
+                                record.name
+                            )}
+                        </div>
+
+                        <div class="record-meta">
+                            ${escapeHtml(
+                                record.occupation
+                            )}
+                            ·
+                            上線：
+                            ${escapeHtml(
+                                record.platinum
+                            )}
+                        </div>
+
+                        <div class="tags">
+                            ${tags}
+                        </div>
+
+                        <div class="record-actions">
+
+                            <button
+                                class="btn-dark"
+                                onclick="window.editRecord('${record.id}')">
+                                修改
+                            </button>
+
+                            <button
+                                class="btn-danger"
+                                onclick="window.removeRecord('${record.id}')">
+                                刪除
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            })
+            .join("");
 
 }
 
 
-/* =====================================================
-   RESET
-===================================================== */
+/* ============================================================
+   修改資料
+============================================================ */
 
-function resetForm(){
+window.editRecord =
+    function(id) {
 
-  document.getElementById(
-    "recordId"
-  ).value="";
-
-
-  document.getElementById(
-    "oldPhotoId"
-  ).value="";
+        const record =
+            currentRecords.find(
+                item =>
+                    item.id === id
+            );
 
 
-  document.getElementById(
-    "photoId"
-  ).value="";
+        if (!record) {
+            return;
+        }
 
 
-  document.getElementById(
-    "photoName"
-  ).value="";
+        editingId =
+            record.id;
+
+        editingOldPhotoId =
+            record.photoFileId ||
+            null;
 
 
-  document.getElementById(
-    "name"
-  ).value="";
+        nameInput.value =
+            record.name || "";
+
+        occupationInput.value =
+            record.occupation || "";
+
+        platinumSelect.value =
+            record.platinum || "";
 
 
-  document.getElementById(
-    "occupation"
-  ).value="";
+        awardGrid
+            .querySelectorAll(
+                "input[type=checkbox]"
+            )
+            .forEach(
+                checkbox => {
+
+                    checkbox.checked =
+                        Array.isArray(
+                            record.awards
+                        ) &&
+                        record.awards.includes(
+                            checkbox.value
+                        );
+
+                }
+            );
 
 
-  document.getElementById(
-    "upline"
-  ).value="";
+        photoInput.value = "";
+
+        if (record.photoDriveUrl) {
+
+            photoPreview.src =
+                record.photoDriveUrl;
+
+            photoPreview.style.display =
+                "block";
+
+        }
 
 
-  document.getElementById(
-    "photoInput"
-  ).value="";
+        editModeBox.classList.remove(
+            "hidden"
+        );
+
+        cancelEditBtn.classList.remove(
+            "hidden"
+        );
+
+        submitBtn.textContent =
+            "儲存修改";
 
 
-  document.getElementById(
-    "photoLabel"
-  ).textContent=
-    "尚未選擇照片";
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+    };
 
 
-  document.getElementById(
-    "preview"
-  ).style.display="none";
+/* ============================================================
+   取消修改
+============================================================ */
 
+cancelEditBtn.addEventListener(
+    "click",
+    () => {
 
-  document.querySelectorAll(
-    ".awardCheck"
-  ).forEach(
-    checkbox => {
-      checkbox.checked=false;
+        resetForm();
+
     }
-  );
+);
 
 
-  document.getElementById(
-    "formTitle"
-  ).textContent=
-    "新增表揚者";
+/* ============================================================
+   刪除資料
+============================================================ */
 
-}
+window.removeRecord =
+    async function(id) {
 
-
-function newRecord(){
-
-  resetForm();
-
-  window.scrollTo({
-    top:250,
-    behavior:"smooth"
-  });
-
-}
+        const record =
+            currentRecords.find(
+                item =>
+                    item.id === id
+            );
 
 
-/* =====================================================
-   STATUS
-===================================================== */
-
-function showStatus(
-  text,
-  error
-){
-
-  const box =
-    document.getElementById(
-      "status"
-    );
+        if (!record) {
+            return;
+        }
 
 
-  box.style.display="block";
-
-  box.style.background =
-    error ?
-    "#3A1515" :
-    "#17351F";
+        const confirmed =
+            confirm(
+                `確定要刪除「${record.name}」的表揚資料嗎？`
+            );
 
 
-  box.style.color =
-    error ?
-    "#FF8A8A" :
-    "#A7E8B5";
+        if (!confirmed) {
+            return;
+        }
 
 
-  box.textContent=text;
+        try {
 
-}
+            showStatus(
+                "正在刪除資料...",
+                "info"
+            );
+
+
+            await deleteDoc(
+                doc(
+                    db,
+                    "recognitions",
+                    id
+                )
+            );
+
+
+            if (record.photoFileId) {
+
+                try {
+
+                    await deletePhoto(
+                        record.photoFileId
+                    );
+
+                } catch (error) {
+
+                    console.warn(
+                        "照片刪除失敗：",
+                        error
+                    );
+
+                }
+
+            }
+
+
+            showStatus(
+                "資料已刪除。",
+                "success"
+            );
+
+
+            await loadMyRecords();
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            showStatus(
+                "刪除失敗：" +
+                error.message,
+                "error"
+            );
+
+        }
+
+    };
+
+
+/* ============================================================
+   照片預覽
+============================================================ */
+
+photoInput.addEventListener(
+    "change",
+    () => {
+
+        const file =
+            photoInput.files[0];
+
+
+        if (!file) {
+            return;
+        }
+
+
+        const url =
+            URL.createObjectURL(
+                file
+            );
+
+
+        photoPreview.src =
+            url;
+
+        photoPreview.style.display =
+            "block";
+
+    }
+);
 
 </script>
 
 </body>
-
 </html>
