@@ -1853,15 +1853,11 @@ window.adminDelete =
 /* ============================================================
    Apps Script
 ============================================================ */
-/* ============================================================
-   Apps Script POST
-   使用獨立 iframe，避免固定 gasFrame 被快取或重複使用
-============================================================ */
 
 function postToAppsScript(fields) {
-
-    return new Promise((resolve, reject) => {
-
+ 
+    return new Promise(async (resolve, reject) => {
+ 
         if (
             !APPS_SCRIPT_URL ||
             !APPS_SCRIPT_URL.includes(
@@ -1869,16 +1865,16 @@ function postToAppsScript(fields) {
             ) ||
             !APPS_SCRIPT_URL.endsWith("/exec")
         ) {
-
+ 
             reject(
                 new Error(
                     "Apps Script /exec URL 設定錯誤。"
                 )
             );
-
+ 
             return;
         }
-
+ 
         const requestId =
             "req_" +
             Date.now() +
@@ -1886,209 +1882,164 @@ function postToAppsScript(fields) {
             Math.random()
                 .toString(36)
                 .slice(2, 10);
-
+ 
         const requestData = {
             ...fields,
             requestId: requestId
         };
-
-        const iframeName =
-            "gasFrame_" +
-            Date.now() +
-            "_" +
-            Math.random()
-                .toString(36)
-                .slice(2, 8);
-
-        const iframe =
-            document.createElement("iframe");
-
-        iframe.name = iframeName;
-        iframe.id = iframeName;
-
-        iframe.style.position = "fixed";
-        iframe.style.width = "1px";
-        iframe.style.height = "1px";
-        iframe.style.opacity = "0";
-        iframe.style.pointerEvents = "none";
-        iframe.style.border = "0";
-        iframe.style.left = "-10000px";
-        iframe.style.top = "-10000px";
-
-        document.body.appendChild(iframe);
-
-        const form =
-            document.createElement("form");
-
-        form.method = "POST";
-        form.action = APPS_SCRIPT_URL;
-        form.target = iframeName;
-        form.enctype = "application/x-www-form-urlencoded";
-        form.style.display = "none";
-
+ 
+        const body = new URLSearchParams();
+ 
         Object.entries(requestData).forEach(
             ([key, value]) => {
-
-                const input =
-                    document.createElement("input");
-
-                input.type = "hidden";
-                input.name = key;
-                input.value =
+ 
+                body.append(
+                    key,
                     typeof value === "string"
                         ? value
-                        : String(value ?? "");
-
-                form.appendChild(input);
+                        : String(value ?? "")
+                );
+ 
             }
         );
-
-        document.body.appendChild(form);
-
-        let finished = false;
-
+ 
         const timeoutMs =
             fields.action === "generatePpt"
                 ? 600000
                 : 120000;
-
-        let timeoutId;
-
-        function cleanup() {
-
-            window.removeEventListener(
-                "message",
-                messageListener
+ 
+        const controller =
+            new AbortController();
+ 
+        const timeoutId =
+            setTimeout(
+                () => controller.abort(),
+                timeoutMs
             );
-
-            clearTimeout(timeoutId);
-
-            try {
-                form.remove();
-            } catch (error) {}
-
-            try {
-                iframe.remove();
-            } catch (error) {}
-        }
-
-        function succeed(result) {
-
-            if (finished) {
-                return;
-            }
-
-            finished = true;
-            cleanup();
-            resolve(result);
-        }
-
-        function fail(error) {
-
-            if (finished) {
-                return;
-            }
-
-            finished = true;
-            cleanup();
-
-            reject(
-                error instanceof Error
-                    ? error
-                    : new Error(String(error))
-            );
-        }
-
-        function messageListener(event) {
-
-            const data = event.data;
-
-            if (
-                !data ||
-                typeof data !== "object"
-            ) {
-                return;
-            }
-
-            if (
-                data.source !== "BS_GLOBAL"
-            ) {
-                return;
-            }
-
-            if (
-                data.requestId !== requestId
-            ) {
-                return;
-            }
-
-            if (
-                data.action !== fields.action
-            ) {
-                return;
-            }
-
-            if (data.success === true) {
-
-                succeed(data.result || {});
-
-            } else {
-
-                fail(
-                    new Error(
-                        data.error ||
-                        "Apps Script 執行失敗。"
-                    )
-                );
-            }
-        }
-
-        window.addEventListener(
-            "message",
-            messageListener
-        );
-
-        timeoutId =
-            setTimeout(() => {
-
-                fail(
-                    new Error(
-                        fields.action === "generatePpt"
-                            ? "Apps Script 沒有在 10 分鐘內回覆。請到 Apps Script「執行作業」查看是否收到這次請求。"
-                            : "Apps Script 沒有在 2 分鐘內回覆。"
-                    )
-                );
-
-            }, timeoutMs);
-
+ 
         console.log(
-            "[BS GLOBAL] 準備送出 POST",
+            "[BS GLOBAL] 準備送出 POST (fetch)",
             {
                 url: APPS_SCRIPT_URL,
                 action: fields.action,
                 requestId: requestId
             }
         );
-
+ 
         try {
-
-            form.submit();
-
+ 
+            const response =
+                await fetch(
+                    APPS_SCRIPT_URL,
+                    {
+                        method: "POST",
+                        body: body,
+                        signal: controller.signal
+                    }
+                );
+ 
+            clearTimeout(timeoutId);
+ 
             console.log(
-                "[BS GLOBAL] POST 已送出",
-                {
-                    action: fields.action,
-                    requestId: requestId
-                }
+                "[BS GLOBAL] POST 回應 HTTP：" +
+                response.status
             );
-
+ 
+            if (!response.ok) {
+ 
+                reject(
+                    new Error(
+                        "Apps Script 回應失敗（HTTP " +
+                        response.status +
+                        "）。"
+                    )
+                );
+ 
+                return;
+ 
+            }
+ 
+            let data;
+ 
+            try {
+ 
+                data = await response.json();
+ 
+            } catch (parseError) {
+ 
+                reject(
+                    new Error(
+                        "無法解析 Apps Script 回應：" +
+                        parseError.message
+                    )
+                );
+ 
+                return;
+ 
+            }
+ 
+            console.log(
+                "[BS GLOBAL] 收到回應",
+                data
+            );
+ 
+            if (data.requestId !== requestId) {
+ 
+                console.warn(
+                    "[BS GLOBAL] requestId 不符，仍繼續處理",
+                    {
+                        expected: requestId,
+                        actual: data.requestId
+                    }
+                );
+ 
+            }
+ 
+            if (data.success === true) {
+ 
+                resolve(data.result || {});
+ 
+            } else {
+ 
+                reject(
+                    new Error(
+                        data.error ||
+                        "Apps Script 執行失敗。"
+                    )
+                );
+ 
+            }
+ 
         } catch (error) {
-
-            fail(error);
+ 
+            clearTimeout(timeoutId);
+ 
+            if (error.name === "AbortError") {
+ 
+                reject(
+                    new Error(
+                        fields.action === "generatePpt"
+                            ? "Apps Script 沒有在 10 分鐘內回覆。請到 Apps Script「執行作業」查看是否收到這次請求。"
+                            : "Apps Script 沒有在 2 分鐘內回覆。"
+                    )
+                );
+ 
+            } else {
+ 
+                console.error(
+                    "[BS GLOBAL] fetch 失敗",
+                    error
+                );
+ 
+                reject(error);
+ 
+            }
+ 
         }
+ 
     });
+ 
 }
-      
 /* ============================================================
    生成 PPT
 ============================================================ */
