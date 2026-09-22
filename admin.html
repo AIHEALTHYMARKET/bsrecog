@@ -1862,9 +1862,9 @@ window.adminDelete =
 /* ============================================================
    Apps Script
 ============================================================ */
-
 /* ============================================================
-   Apps Script
+   Apps Script POST
+   使用獨立 iframe，避免固定 gasFrame 被快取或重複使用
 ============================================================ */
 
 function postToAppsScript(fields) {
@@ -1875,36 +1875,18 @@ function postToAppsScript(fields) {
             !APPS_SCRIPT_URL ||
             !APPS_SCRIPT_URL.includes(
                 "script.google.com/macros/s/"
-            )
+            ) ||
+            !APPS_SCRIPT_URL.endsWith("/exec")
         ) {
 
             reject(
                 new Error(
-                    "Apps Script /exec URL 沒有正確設定。"
+                    "Apps Script /exec URL 設定錯誤。"
                 )
             );
 
             return;
         }
-
-
-        const iframe =
-            document.getElementById(
-                "gasFrame"
-            );
-
-
-        if (!iframe) {
-
-            reject(
-                new Error(
-                    "找不到 gasFrame iframe。"
-                )
-            );
-
-            return;
-        }
-
 
         const requestId =
             "req_" +
@@ -1912,247 +1894,210 @@ function postToAppsScript(fields) {
             "_" +
             Math.random()
                 .toString(36)
-                .substring(2, 10);
-
+                .slice(2, 10);
 
         const requestData = {
-
             ...fields,
-
-            requestId:
-                requestId
-
+            requestId: requestId
         };
 
+        const iframeName =
+            "gasFrame_" +
+            Date.now() +
+            "_" +
+            Math.random()
+                .toString(36)
+                .slice(2, 8);
+
+        const iframe =
+            document.createElement("iframe");
+
+        iframe.name = iframeName;
+        iframe.id = iframeName;
+
+        iframe.style.position = "fixed";
+        iframe.style.width = "1px";
+        iframe.style.height = "1px";
+        iframe.style.opacity = "0";
+        iframe.style.pointerEvents = "none";
+        iframe.style.border = "0";
+        iframe.style.left = "-10000px";
+        iframe.style.top = "-10000px";
+
+        document.body.appendChild(iframe);
+
+        const form =
+            document.createElement("form");
+
+        form.method = "POST";
+        form.action = APPS_SCRIPT_URL;
+        form.target = iframeName;
+        form.enctype = "application/x-www-form-urlencoded";
+        form.style.display = "none";
+
+        Object.entries(requestData).forEach(
+            ([key, value]) => {
+
+                const input =
+                    document.createElement("input");
+
+                input.type = "hidden";
+                input.name = key;
+                input.value =
+                    typeof value === "string"
+                        ? value
+                        : String(value ?? "");
+
+                form.appendChild(input);
+            }
+        );
+
+        document.body.appendChild(form);
 
         let finished = false;
 
+        const timeoutMs =
+            fields.action === "generatePpt"
+                ? 600000
+                : 120000;
+
+        let timeoutId;
 
         function cleanup() {
 
             window.removeEventListener(
                 "message",
-                listener
+                messageListener
             );
 
+            clearTimeout(timeoutId);
+
             try {
-
                 form.remove();
-
             } catch (error) {}
 
+            try {
+                iframe.remove();
+            } catch (error) {}
         }
 
-
-        function finishSuccess(result) {
+        function succeed(result) {
 
             if (finished) {
                 return;
             }
 
             finished = true;
-
-            clearTimeout(timeout);
-
             cleanup();
-
             resolve(result);
-
         }
 
-
-        function finishError(error) {
+        function fail(error) {
 
             if (finished) {
                 return;
             }
 
             finished = true;
-
-            clearTimeout(timeout);
-
             cleanup();
 
-            reject(error);
-
+            reject(
+                error instanceof Error
+                    ? error
+                    : new Error(String(error))
+            );
         }
 
+        function messageListener(event) {
 
-        function listener(event) {
-
-            const data =
-                event.data;
-
+            const data = event.data;
 
             if (
                 !data ||
                 typeof data !== "object"
             ) {
-
                 return;
-
             }
-
 
             if (
-                data.source !==
-                "BS_GLOBAL"
+                data.source !== "BS_GLOBAL"
             ) {
-
                 return;
-
             }
-
 
             if (
-                data.requestId &&
-                data.requestId !==
-                requestId
+                data.requestId !== requestId
             ) {
-
                 return;
-
             }
-
 
             if (
-                data.action !==
-                    fields.action
+                data.action !== fields.action
             ) {
-
                 return;
-
             }
 
+            if (data.success === true) {
 
-            if (data.success) {
-
-                finishSuccess(
-                    data.result
-                );
+                succeed(data.result || {});
 
             } else {
 
-                finishError(
+                fail(
                     new Error(
                         data.error ||
-                        "Apps Script 執行失敗"
+                        "Apps Script 執行失敗。"
                     )
                 );
-
             }
-
         }
-
 
         window.addEventListener(
             "message",
-            listener
+            messageListener
         );
 
+        timeoutId =
+            setTimeout(() => {
 
-        const form =
-            document.createElement(
-                "form"
-            );
-
-
-        form.method =
-            "POST";
-
-
-        form.action =
-            APPS_SCRIPT_URL;
-
-
-        form.target =
-            "gasFrame";
-
-
-        form.style.display =
-            "none";
-
-
-        Object.entries(
-            requestData
-        ).forEach(
-            ([key, value]) => {
-
-                const input =
-                    document.createElement(
-                        "input"
-                    );
-
-
-                input.type =
-                    "hidden";
-
-
-                input.name =
-                    key;
-
-
-                input.value =
-                    value ?? "";
-
-
-                form.appendChild(
-                    input
+                fail(
+                    new Error(
+                        fields.action === "generatePpt"
+                            ? "Apps Script 沒有在 10 分鐘內回覆。請到 Apps Script「執行作業」查看是否收到這次請求。"
+                            : "Apps Script 沒有在 2 分鐘內回覆。"
+                    )
                 );
 
+            }, timeoutMs);
+
+        console.log(
+            "[BS GLOBAL] 準備送出 POST",
+            {
+                url: APPS_SCRIPT_URL,
+                action: fields.action,
+                requestId: requestId
             }
         );
-
-
-        document.body.appendChild(
-            form
-        );
-
-
-        const timeout =
-            setTimeout(
-                () => {
-
-                    finishError(
-                        new Error(
-                            fields.action ===
-                            "generatePpt"
-
-                                ? "PPT 生成逾時。照片較多時可能需要幾分鐘，請先檢查 Google Drive，不要立即重複生成。"
-
-                                : "Apps Script 服務回覆逾時。"
-                        )
-                    );
-
-                },
-                fields.action ===
-                "generatePpt"
-
-                    ? 600000
-
-                    : 120000
-            );
-
 
         try {
 
             form.submit();
 
+            console.log(
+                "[BS GLOBAL] POST 已送出",
+                {
+                    action: fields.action,
+                    requestId: requestId
+                }
+            );
+
         } catch (error) {
 
-            finishError(error);
-
+            fail(error);
         }
-
     });
-
 }
-
-
-/* ============================================================
-   生成 PPT
-============================================================ */
-
+      
 /* ============================================================
    生成 PPT
 ============================================================ */
