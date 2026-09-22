@@ -1451,152 +1451,199 @@ function blobToBase64(blob) {
    Apps Script POST
 ============================================================ */
 
-function postToAppsScript(
-    fields
-) {
+function postToAppsScript(data) {
 
-    return new Promise(
-        (resolve, reject) => {
+  return new Promise((resolve, reject) => {
 
-            const callbackTimeout =
-                setTimeout(
-                    () => {
+    const iframe =
+      document.getElementById("gasFrame");
 
-                        window.removeEventListener(
-                            "message",
-                            listener
-                        );
+    if (!iframe) {
 
-                        reject(
-                            new Error(
-                                "Google Drive 服務逾時，請稍後再試。"
-                            )
-                        );
+      reject(
+        new Error("找不到 gasFrame")
+      );
 
-                    },
-                    90000
-                );
+      return;
+
+    }
 
 
-            function listener(event) {
+    const form =
+      document.createElement("form");
 
-                const data =
-                    event.data;
+    form.method = "POST";
 
-                if (
-                    !data ||
-                    data.source !==
-                        "BS_GLOBAL"
-                ) {
+    form.action =
+      APPS_SCRIPT_URL;
 
-                    return;
+    form.target =
+      "gasFrame";
 
-                }
-
-
-                clearTimeout(
-                    callbackTimeout
-                );
-
-                window.removeEventListener(
-                    "message",
-                    listener
-                );
+    form.style.display =
+      "none";
 
 
-                if (
-                    data.success
-                ) {
+    Object.keys(data).forEach(key => {
 
-                    resolve(
-                        data.result
-                    );
+      const input =
+        document.createElement("input");
 
-                } else {
+      input.type =
+        "hidden";
 
-                    reject(
-                        new Error(
-                            data.error ||
-                            "Apps Script 執行失敗"
-                        )
-                    );
+      input.name =
+        key;
 
-                }
+      input.value =
+        data[key] ?? "";
 
-            }
+      form.appendChild(
+        input
+      );
 
-
-            window.addEventListener(
-                "message",
-                listener
-            );
+    });
 
 
-            const form =
-                document.createElement(
-                    "form"
-                );
-
-            form.method = "POST";
-
-            form.action =
-                APPS_SCRIPT_URL;
-
-            form.target =
-                "gasFrame";
-
-            form.style.display =
-                "none";
-
-
-            Object.entries(fields)
-                .forEach(
-                    ([key, value]) => {
-
-                        const input =
-                            document.createElement(
-                                "input"
-                            );
-
-                        input.type =
-                            "hidden";
-
-                        input.name =
-                            key;
-
-                        input.value =
-                            value ?? "";
-
-                        form.appendChild(
-                            input
-                        );
-
-                    }
-                );
-
-
-            document.body.appendChild(
-                form
-            );
-
-            form.submit();
-
-
-            setTimeout(
-                () => {
-
-                    form.remove();
-
-                },
-                3000
-            );
-
-        }
+    document.body.appendChild(
+      form
     );
 
+
+    let finished = false;
+
+
+    const timeout =
+      setTimeout(() => {
+
+        if (finished) {
+          return;
+        }
+
+        finished = true;
+
+        cleanup();
+
+        reject(
+          new Error(
+            "Google Drive 服務逾時，請稍後再試。"
+          )
+        );
+
+      }, 240000);
+
+
+    function cleanup() {
+
+      clearTimeout(
+        timeout
+      );
+
+      window.removeEventListener(
+        "message",
+        messageHandler
+      );
+
+      try {
+
+        form.remove();
+
+      } catch (e) {}
+
+    }
+
+
+    function messageHandler(event) {
+
+      const result =
+        event.data;
+
+
+      if (
+        !result ||
+        typeof result !== "object"
+      ) {
+
+        return;
+
+      }
+
+
+      if (
+        result.action !==
+          "uploadPhoto" &&
+        result.action !==
+          "deletePhoto" &&
+        result.action !==
+          "generatePpt"
+      ) {
+
+        return;
+
+      }
+
+
+      if (finished) {
+        return;
+      }
+
+
+      finished = true;
+
+      cleanup();
+
+
+      if (
+        result.success
+      ) {
+
+        resolve(
+          result.result
+        );
+
+      } else {
+
+        reject(
+          new Error(
+            result.error ||
+            "Google Apps Script 執行失敗"
+          )
+        );
+
+      }
+
+    }
+
+
+    window.addEventListener(
+      "message",
+      messageHandler
+    );
+
+
+    try {
+
+      form.submit();
+
+    } catch (error) {
+
+      if (!finished) {
+
+        finished = true;
+
+        cleanup();
+
+        reject(
+          error
+        );
+
+      }
+
+    }
+
+  });
+
 }
-
-
 /* ============================================================
    上傳照片
 ============================================================ */
