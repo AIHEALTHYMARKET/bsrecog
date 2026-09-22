@@ -1,605 +1,602 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>BS GLOBAL｜榮耀時刻表揚</title>
+<title>BS GLOBAL｜榮耀時刻表揚</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<style>
 
-    html {
-      scroll-behavior: smooth;
-    }
+*{
+  box-sizing:border-box;
+}
 
-    body {
-      margin: 0;
-      font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Noto Sans TC",
-        "PingFang TC",
-        "Microsoft JhengHei",
-        Arial,
-        sans-serif;
+body{
+  margin:0;
+  background:#080808;
+  color:#f5f5f5;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Noto Sans TC",
+    "PingFang TC",
+    "Microsoft JhengHei",
+    Arial,
+    sans-serif;
+}
 
-      background:
-        radial-gradient(circle at top right, rgba(212,175,55,.10), transparent 30%),
-        radial-gradient(circle at bottom left, rgba(212,175,55,.06), transparent 30%),
-        #080808;
+.container{
+  width:min(960px,calc(100% - 28px));
+  margin:auto;
+}
 
-      color: #f5f5f5;
-      min-height: 100vh;
-    }
+header{
+  text-align:center;
+  padding:42px 0 28px;
+}
 
-    .container {
-      width: min(960px, calc(100% - 28px));
-      margin: 0 auto;
-    }
+.brand{
+  color:#d4af37;
+  letter-spacing:5px;
+  font-size:14px;
+  font-weight:700;
+  margin-bottom:12px;
+}
 
-    header {
-      padding: 42px 0 28px;
-      text-align: center;
-    }
+h1{
+  margin:0;
+  font-size:clamp(30px,7vw,54px);
+  letter-spacing:4px;
+}
 
-    .brand {
-      letter-spacing: 5px;
-      font-size: 14px;
-      color: #d4af37;
-      font-weight: 700;
-      margin-bottom: 12px;
-    }
+.subtitle{
+  margin-top:10px;
+  color:#999;
+  font-size:14px;
+}
 
-    h1 {
-      margin: 0;
-      font-size: clamp(30px, 7vw, 54px);
-      letter-spacing: 4px;
-      font-weight: 800;
-    }
+.card{
+  background:#141414;
+  border:1px solid rgba(212,175,55,.28);
+  border-radius:20px;
+  padding:24px;
+  margin-bottom:22px;
+  box-shadow:0 18px 60px rgba(0,0,0,.35);
+}
 
-    .subtitle {
-      margin-top: 10px;
-      color: #aaa;
-      font-size: 14px;
-    }
+.section-title{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:19px;
+  font-weight:800;
+  margin-bottom:20px;
+}
 
-    .card {
-      background: rgba(20,20,20,.92);
-      border: 1px solid rgba(212,175,55,.28);
-      border-radius: 20px;
-      padding: 24px;
-      margin-bottom: 22px;
-      box-shadow:
-        0 18px 60px rgba(0,0,0,.35),
-        inset 0 1px 0 rgba(255,255,255,.03);
-    }
+.section-title:before{
+  content:"";
+  width:4px;
+  height:22px;
+  border-radius:5px;
+  background:#d4af37;
+}
 
-    .section-title {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 19px;
-      font-weight: 800;
-      margin-bottom: 20px;
-    }
+.form-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+}
 
-    .section-title::before {
-      content: "";
-      width: 4px;
-      height: 22px;
-      border-radius: 5px;
-      background: #d4af37;
-    }
+.full{
+  grid-column:1/-1;
+}
 
-    .login-box {
-      text-align: center;
-    }
+label{
+  display:block;
+  color:#ddd;
+  font-size:14px;
+  font-weight:700;
+  margin-bottom:8px;
+}
 
-    .login-email {
-      color: #aaa;
-      font-size: 13px;
-      margin-top: 12px;
-      word-break: break-all;
-    }
+input[type=text],
+input[type=file],
+select{
+  width:100%;
+  padding:13px 14px;
+  border-radius:11px;
+  border:1px solid #3d3d3d;
+  background:#111;
+  color:#fff;
+  font-size:15px;
+  outline:none;
+}
 
-    button {
-      border: 0;
-      cursor: pointer;
-      font-family: inherit;
-    }
+input:focus,
+select:focus{
+  border-color:#d4af37;
+}
 
-    .btn {
-      border-radius: 12px;
-      padding: 13px 20px;
-      font-size: 15px;
-      font-weight: 700;
-      transition: .2s;
-    }
+.btn{
+  border:0;
+  border-radius:12px;
+  padding:13px 20px;
+  font-size:15px;
+  font-weight:700;
+  cursor:pointer;
+}
 
-    .btn:disabled {
-      opacity: .55;
-      cursor: not-allowed;
-    }
+.btn:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+}
 
-    .btn-gold {
-      color: #111;
-      background: linear-gradient(135deg, #f4d86b, #c89b2c);
-      box-shadow: 0 8px 25px rgba(212,175,55,.18);
-    }
+.btn-gold{
+  color:#111;
+  background:linear-gradient(135deg,#f4d86b,#c89b2c);
+}
 
-    .btn-gold:hover:not(:disabled) {
-      transform: translateY(-1px);
-      filter: brightness(1.05);
-    }
+.btn-dark{
+  color:#eee;
+  background:#252525;
+  border:1px solid #444;
+}
 
-    .btn-dark {
-      color: #eee;
-      background: #252525;
-      border: 1px solid #444;
-    }
+.btn-danger{
+  color:#fff;
+  background:#6e2020;
+}
 
-    .btn-danger {
-      color: #fff;
-      background: #6e2020;
-      border: 1px solid #8c3434;
-    }
+.btn-small{
+  padding:8px 12px;
+  font-size:13px;
+}
 
-    .btn-small {
-      padding: 8px 12px;
-      font-size: 13px;
-      border-radius: 9px;
-    }
+.award-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
 
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
-    }
+.award-item{
+  position:relative;
+}
 
-    .full {
-      grid-column: 1 / -1;
-    }
+.award-item input{
+  position:absolute;
+  opacity:0;
+}
 
-    label {
-      display: block;
-      color: #ddd;
-      font-size: 14px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
+.award-item label{
+  display:flex;
+  align-items:center;
+  min-height:48px;
+  padding:10px 13px;
+  margin:0;
+  border:1px solid #383838;
+  border-radius:10px;
+  background:#111;
+  color:#ccc;
+  cursor:pointer;
+}
 
-    input[type="text"],
-    input[type="file"],
-    select {
-      width: 100%;
-      padding: 13px 14px;
-      border-radius: 11px;
-      border: 1px solid #3d3d3d;
-      background: #111;
-      color: #f5f5f5;
-      outline: none;
-      font-size: 15px;
-    }
+.award-item input:checked+label{
+  border-color:#d4af37;
+  background:rgba(212,175,55,.12);
+  color:#f4d86b;
+}
 
-    input:focus,
-    select:focus {
-      border-color: #d4af37;
-      box-shadow: 0 0 0 3px rgba(212,175,55,.08);
-    }
+.hint{
+  color:#888;
+  font-size:12px;
+  margin-top:7px;
+  line-height:1.5;
+}
 
-    .hint {
-      color: #888;
-      font-size: 12px;
-      margin-top: 7px;
-      line-height: 1.5;
-    }
+.actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:22px;
+}
 
-    .award-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      gap: 10px;
-    }
+.message{
+  display:none;
+  padding:14px 16px;
+  border-radius:11px;
+  margin-bottom:18px;
+  font-size:14px;
+  line-height:1.6;
+  white-space:pre-wrap;
+}
 
-    .award-item {
-      position: relative;
-    }
+.message.success{
+  display:block;
+  background:rgba(45,130,75,.16);
+  border:1px solid rgba(75,180,105,.35);
+  color:#9ee0b0;
+}
 
-    .award-item input {
-      position: absolute;
-      opacity: 0;
-      pointer-events: none;
-    }
+.message.error{
+  display:block;
+  background:rgba(150,40,40,.16);
+  border:1px solid rgba(210,80,80,.35);
+  color:#ffaaaa;
+}
 
-    .award-item label {
-      display: flex;
-      align-items: center;
-      min-height: 48px;
-      padding: 10px 13px;
-      margin: 0;
-      border: 1px solid #383838;
-      border-radius: 10px;
-      background: #111;
-      color: #ccc;
-      cursor: pointer;
-      transition: .18s;
-    }
+.message.info{
+  display:block;
+  background:rgba(50,90,140,.16);
+  border:1px solid rgba(80,140,210,.35);
+  color:#a9cdf2;
+}
 
-    .award-item input:checked + label {
-      border-color: #d4af37;
-      background: rgba(212,175,55,.12);
-      color: #f4d86b;
-      box-shadow: inset 0 0 0 1px rgba(212,175,55,.18);
-    }
+.record{
+  border:1px solid #343434;
+  background:#101010;
+  border-radius:14px;
+  padding:16px;
+  margin-bottom:12px;
+}
 
-    .photo-preview-wrap {
-      display: none;
-      margin-top: 14px;
-      text-align: center;
-    }
+.record-main{
+  display:grid;
+  grid-template-columns:80px 1fr;
+  gap:14px;
+  align-items:center;
+}
 
-    .photo-preview {
-      max-width: 240px;
-      max-height: 280px;
-      object-fit: contain;
-      border-radius: 14px;
-      border: 1px solid #444;
-      background: #111;
-    }
+.record-photo{
+  width:80px;
+  height:80px;
+  border-radius:12px;
+  object-fit:cover;
+  background:#222;
+}
 
-    .existing-photo {
-      margin-top: 12px;
-      color: #aaa;
-      font-size: 12px;
-    }
+.record-name{
+  font-size:17px;
+  font-weight:800;
+  color:#f3d66a;
+}
 
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 22px;
-    }
+.record-meta{
+  color:#999;
+  font-size:13px;
+  line-height:1.6;
+  margin-top:4px;
+}
 
-    .message {
-      display: none;
-      padding: 13px 15px;
-      border-radius: 11px;
-      margin-bottom: 18px;
-      font-size: 14px;
-      line-height: 1.55;
-      white-space: pre-wrap;
-    }
+.award-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:8px;
+}
 
-    .message.success {
-      display: block;
-      background: rgba(45,130,75,.16);
-      border: 1px solid rgba(75,180,105,.35);
-      color: #9ee0b0;
-    }
+.tag{
+  padding:5px 8px;
+  border-radius:999px;
+  border:1px solid rgba(212,175,55,.35);
+  background:rgba(212,175,55,.08);
+  color:#e4c65b;
+  font-size:11px;
+}
 
-    .message.error {
-      display: block;
-      background: rgba(150,40,40,.16);
-      border: 1px solid rgba(210,80,80,.35);
-      color: #ffaaaa;
-    }
+.record-actions{
+  display:flex;
+  gap:8px;
+  margin-top:14px;
+}
 
-    .message.info {
-      display: block;
-      background: rgba(50,90,140,.16);
-      border: 1px solid rgba(80,140,210,.35);
-      color: #a9cdf2;
-    }
+.empty{
+  text-align:center;
+  padding:28px 10px;
+  color:#777;
+  border:1px dashed #333;
+  border-radius:12px;
+}
 
-    .record {
-      border: 1px solid #343434;
-      background: #101010;
-      border-radius: 14px;
-      padding: 16px;
-      margin-bottom: 12px;
-    }
+.loading{
+  text-align:center;
+  padding:20px;
+  color:#aaa;
+}
 
-    .record-main {
-      display: grid;
-      grid-template-columns: 80px 1fr;
-      gap: 14px;
-      align-items: center;
-    }
+.preview{
+  display:none;
+  margin-top:12px;
+  text-align:center;
+}
 
-    .record-photo {
-      width: 80px;
-      height: 80px;
-      border-radius: 12px;
-      object-fit: cover;
-      background: #222;
-      border: 1px solid #444;
-    }
+.preview img{
+  max-width:240px;
+  max-height:280px;
+  border-radius:14px;
+}
 
-    .record-name {
-      font-size: 17px;
-      font-weight: 800;
-      color: #f3d66a;
-    }
+.admin-link{
+  text-align:center;
+  margin:30px 0 50px;
+}
 
-    .record-meta {
-      color: #999;
-      font-size: 13px;
-      line-height: 1.6;
-      margin-top: 4px;
-    }
+.admin-link a{
+  color:#d4af37;
+  text-decoration:none;
+}
 
-    .award-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 8px;
-    }
+@media(max-width:700px){
 
-    .tag {
-      display: inline-flex;
-      padding: 5px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(212,175,55,.35);
-      background: rgba(212,175,55,.08);
-      color: #e4c65b;
-      font-size: 11px;
-    }
+  .form-grid{
+    grid-template-columns:1fr;
+  }
 
-    .record-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 14px;
-    }
+  .full{
+    grid-column:auto;
+  }
 
-    .empty {
-      text-align: center;
-      padding: 28px 10px;
-      color: #777;
-      border: 1px dashed #333;
-      border-radius: 12px;
-    }
+  .award-grid{
+    grid-template-columns:1fr;
+  }
 
-    .loading {
-      text-align: center;
-      padding: 20px;
-      color: #aaa;
-    }
+  .card{
+    padding:18px;
+  }
 
-    .admin-link {
-      text-align: center;
-      margin: 30px 0 50px;
-    }
+  .record-main{
+    grid-template-columns:65px 1fr;
+  }
 
-    .admin-link a {
-      color: #d4af37;
-      text-decoration: none;
-      font-size: 13px;
-    }
+  .record-photo{
+    width:65px;
+    height:65px;
+  }
 
-    .status-dot {
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #777;
-      margin-right: 6px;
-    }
+}
 
-    .status-dot.online {
-      background: #4bd27b;
-      box-shadow: 0 0 8px rgba(75,210,123,.6);
-    }
-
-    @media (max-width: 700px) {
-      .form-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .full {
-        grid-column: auto;
-      }
-
-      .award-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .card {
-        padding: 18px;
-        border-radius: 16px;
-      }
-
-      .record-main {
-        grid-template-columns: 65px 1fr;
-      }
-
-      .record-photo {
-        width: 65px;
-        height: 65px;
-      }
-    }
-  </style>
+</style>
 </head>
 
 <body>
 
 <div class="container">
 
-  <header>
-    <div class="brand">BS GLOBAL</div>
-    <h1>榮耀時刻表揚</h1>
-    <div class="subtitle">每一份突破，都值得被看見。</div>
-  </header>
+<header>
+  <div class="brand">BS GLOBAL</div>
+  <h1>榮耀時刻表揚</h1>
+  <div class="subtitle">每一份突破，都值得被看見。</div>
+</header>
 
-  <!-- LOGIN -->
-  <section class="card login-box">
 
-    <div id="loginArea">
+<!-- LOGIN -->
 
-      <div class="section-title">
-        Google 登入
+<section class="card">
+
+  <div id="loginArea" style="text-align:center;">
+
+    <div class="section-title">
+      Google 登入
+    </div>
+
+    <p style="color:#aaa;font-size:14px;">
+      請使用 Google 帳號登入。
+    </p>
+
+    <button
+      id="googleLoginBtn"
+      class="btn btn-gold"
+      type="button">
+      使用 Google 登入
+    </button>
+
+  </div>
+
+
+  <div id="userArea"
+       style="display:none;text-align:center;">
+
+    <div style="font-weight:700;">
+      ● 已登入
+    </div>
+
+    <div
+      id="userEmail"
+      style="color:#aaa;font-size:13px;margin-top:8px;">
+    </div>
+
+    <button
+      id="logoutBtn"
+      class="btn btn-dark btn-small"
+      style="margin-top:12px;"
+      type="button">
+      登出
+    </button>
+
+  </div>
+
+</section>
+
+
+<div id="message"
+     class="message">
+</div>
+
+
+<!-- FORM -->
+
+<section
+  id="formSection"
+  class="card"
+  style="display:none;">
+
+  <div class="section-title">
+    <span id="formTitle">
+      新增表揚資料
+    </span>
+  </div>
+
+
+  <form id="recognitionForm">
+
+    <div class="form-grid">
+
+
+      <div>
+
+        <label>
+          表揚者姓名 *
+        </label>
+
+        <input
+          id="name"
+          type="text"
+          maxlength="100"
+          required
+          placeholder="請輸入姓名">
+
       </div>
 
-      <p style="color:#aaa;font-size:14px;">
-        請使用你的 Google 帳號登入後填寫表揚資料。
-      </p>
+
+      <div>
+
+        <label>
+          表揚者職業 *
+        </label>
+
+        <input
+          id="occupation"
+          type="text"
+          maxlength="100"
+          required
+          placeholder="請輸入職業">
+
+      </div>
+
+
+      <div>
+
+        <label>
+          上線白金 *
+        </label>
+
+        <select
+          id="platinum"
+          required>
+
+          <option value="">
+            請選擇上線白金
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div>
+
+        <label>
+          表揚者照片 *
+        </label>
+
+        <input
+          id="photo"
+          type="file"
+          accept="image/jpeg,image/jpg,image/png">
+
+        <div class="hint">
+          JPG / JPEG / PNG。系統會自動壓縮。
+        </div>
+
+        <div
+          id="existingPhoto"
+          class="hint">
+        </div>
+
+        <div
+          id="preview"
+          class="preview">
+
+          <img
+            id="previewImg"
+            alt="照片預覽">
+
+        </div>
+
+      </div>
+
+
+      <div class="full">
+
+        <label>
+          突破獎銜 *
+        </label>
+
+        <div
+          id="awardGrid"
+          class="award-grid">
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="actions">
 
       <button
-        id="googleLoginBtn"
+        id="submitBtn"
         class="btn btn-gold"
-        type="button">
-        使用 Google 登入
+        type="submit">
+        提交表揚資料
+      </button>
+
+      <button
+        id="cancelEditBtn"
+        class="btn btn-dark"
+        type="button"
+        style="display:none;">
+        取消修改
       </button>
 
     </div>
 
-    <div id="userArea" style="display:none;">
+  </form>
 
-      <div style="font-size:15px;font-weight:700;">
-        <span class="status-dot online"></span>
-        已登入
-      </div>
+</section>
 
-      <div id="userEmail" class="login-email"></div>
 
-      <div style="margin-top:15px;">
-        <button
-          id="logoutBtn"
-          class="btn btn-dark btn-small"
-          type="button">
-          登出
-        </button>
-      </div>
+<!-- MY RECORDS -->
 
-    </div>
+<section
+  id="recordsSection"
+  class="card"
+  style="display:none;">
 
-  </section>
-
-  <div id="message" class="message"></div>
-
-  <!-- FORM -->
-  <section id="formSection" class="card" style="display:none;">
-
-    <div class="section-title">
-      <span id="formTitle">新增表揚資料</span>
-    </div>
-
-    <form id="recognitionForm">
-
-      <div class="form-grid">
-
-        <div>
-          <label for="name">表揚者姓名 *</label>
-          <input
-            id="name"
-            type="text"
-            maxlength="100"
-            required
-            placeholder="請輸入姓名">
-        </div>
-
-        <div>
-          <label for="occupation">表揚者職業 *</label>
-          <input
-            id="occupation"
-            type="text"
-            maxlength="100"
-            required
-            placeholder="請輸入職業">
-        </div>
-
-        <div>
-          <label for="platinum">上線白金 *</label>
-
-          <select id="platinum" required>
-            <option value="">請選擇上線白金</option>
-          </select>
-        </div>
-
-        <div>
-          <label for="photo">表揚者照片 *</label>
-
-          <input
-            id="photo"
-            type="file"
-            accept="image/jpeg,image/jpg,image/png">
-
-          <div class="hint">
-            建議使用清晰的人像照片。系統會自動壓縮後上傳。
-          </div>
-
-          <div id="existingPhoto" class="existing-photo"></div>
-
-          <div id="photoPreviewWrap" class="photo-preview-wrap">
-            <img id="photoPreview" class="photo-preview">
-          </div>
-        </div>
-
-        <div class="full">
-
-          <label>
-            突破獎銜 *
-          </label>
-
-          <div id="awardGrid" class="award-grid"></div>
-
-          <div class="hint">
-            可選擇多個突破獎銜。
-          </div>
-
-        </div>
-
-      </div>
-
-      <div class="actions">
-
-        <button
-          id="submitBtn"
-          type="submit"
-          class="btn btn-gold">
-          提交表揚資料
-        </button>
-
-        <button
-          id="cancelEditBtn"
-          type="button"
-          class="btn btn-dark"
-          style="display:none;">
-          取消修改
-        </button>
-
-      </div>
-
-    </form>
-
-  </section>
-
-  <!-- RECORDS -->
-  <section id="recordsSection" class="card" style="display:none;">
-
-    <div class="section-title">
-      我的表揚資料
-    </div>
-
-    <div id="recordsLoading" class="loading">
-      正在讀取資料……
-    </div>
-
-    <div id="recordsList"></div>
-
-  </section>
-
-  <div class="admin-link">
-    <a href="admin.html">
-      管理員後台
-    </a>
+  <div class="section-title">
+    我的表揚資料
   </div>
+
+  <div
+    id="recordsLoading"
+    class="loading">
+    正在讀取資料……
+  </div>
+
+  <div id="recordsList"></div>
+
+</section>
+
+
+<div class="admin-link">
+  <a href="admin.html">
+    管理員後台
+  </a>
+</div>
 
 </div>
 
 
-<!-- IMPORTANT: hidden iframe for Apps Script -->
 <iframe
   id="gasFrame"
   name="gasFrame"
@@ -609,8 +606,9 @@
 
 <script type="module">
 
+
 /* =========================================================
-   FIREBASE
+   FIREBASE IMPORT
 ========================================================= */
 
 import {
@@ -666,22 +664,15 @@ const firebaseConfig = {
 
   measurementId:
     "G-JEPWHQ6FQ9"
+
 };
 
 
 /* =========================================================
-   APPS SCRIPT
+   IMPORTANT
+   把你目前「已經可以收到照片」的 Apps Script
+   /exec URL 放在這裡。
 ========================================================= */
-
-/*
-  ⚠️ 這裡必須是你目前 Apps Script 部署後的 /exec URL。
-
-  如果你之前的 Apps Script URL 沒有改變，
-  就保持原本 URL。
-
-  如果你重新建立了 Apps Script Web App，
-  把下面這一行換成新的 /exec URL。
-*/
 
 const APPS_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbycfMlsXP84tZxRB22oDpoAEStBqvi_dt3zhVsEzNJ9YKL75XEKIca-ZEl8weMl_iqe/exec";
@@ -743,7 +734,9 @@ const DEFAULT_AWARD_LIST = [
 ========================================================= */
 
 const app =
-  initializeApp(firebaseConfig);
+  initializeApp(
+    firebaseConfig
+  );
 
 const auth =
   getAuth(app);
@@ -755,7 +748,7 @@ const provider =
   new GoogleAuthProvider();
 
 provider.setCustomParameters({
-  prompt: "select_account"
+  prompt:"select_account"
 });
 
 
@@ -764,90 +757,144 @@ provider.setCustomParameters({
 ========================================================= */
 
 const googleLoginBtn =
-  document.getElementById("googleLoginBtn");
+  document.getElementById(
+    "googleLoginBtn"
+  );
 
 const logoutBtn =
-  document.getElementById("logoutBtn");
+  document.getElementById(
+    "logoutBtn"
+  );
 
 const loginArea =
-  document.getElementById("loginArea");
+  document.getElementById(
+    "loginArea"
+  );
 
 const userArea =
-  document.getElementById("userArea");
+  document.getElementById(
+    "userArea"
+  );
 
 const userEmail =
-  document.getElementById("userEmail");
+  document.getElementById(
+    "userEmail"
+  );
 
 const formSection =
-  document.getElementById("formSection");
+  document.getElementById(
+    "formSection"
+  );
 
 const recordsSection =
-  document.getElementById("recordsSection");
+  document.getElementById(
+    "recordsSection"
+  );
 
 const form =
-  document.getElementById("recognitionForm");
+  document.getElementById(
+    "recognitionForm"
+  );
 
 const formTitle =
-  document.getElementById("formTitle");
+  document.getElementById(
+    "formTitle"
+  );
 
 const nameInput =
-  document.getElementById("name");
+  document.getElementById(
+    "name"
+  );
 
 const occupationInput =
-  document.getElementById("occupation");
+  document.getElementById(
+    "occupation"
+  );
 
 const platinumSelect =
-  document.getElementById("platinum");
+  document.getElementById(
+    "platinum"
+  );
 
 const photoInput =
-  document.getElementById("photo");
-
-const photoPreviewWrap =
-  document.getElementById("photoPreviewWrap");
-
-const photoPreview =
-  document.getElementById("photoPreview");
+  document.getElementById(
+    "photo"
+  );
 
 const existingPhoto =
-  document.getElementById("existingPhoto");
+  document.getElementById(
+    "existingPhoto"
+  );
+
+const preview =
+  document.getElementById(
+    "preview"
+  );
+
+const previewImg =
+  document.getElementById(
+    "previewImg"
+  );
 
 const awardGrid =
-  document.getElementById("awardGrid");
+  document.getElementById(
+    "awardGrid"
+  );
 
 const submitBtn =
-  document.getElementById("submitBtn");
+  document.getElementById(
+    "submitBtn"
+  );
 
 const cancelEditBtn =
-  document.getElementById("cancelEditBtn");
+  document.getElementById(
+    "cancelEditBtn"
+  );
 
 const recordsLoading =
-  document.getElementById("recordsLoading");
+  document.getElementById(
+    "recordsLoading"
+  );
 
 const recordsList =
-  document.getElementById("recordsList");
+  document.getElementById(
+    "recordsList"
+  );
 
 const messageBox =
-  document.getElementById("message");
+  document.getElementById(
+    "message"
+  );
 
 
 /* =========================================================
    STATE
 ========================================================= */
 
-let currentUser = null;
+let currentUser =
+  null;
 
-let currentSettings = {
-  platinumList: [...DEFAULT_PLATINUM_LIST],
-  awardList: [...DEFAULT_AWARD_LIST]
+let settings = {
+
+  platinumList:
+    [...DEFAULT_PLATINUM_LIST],
+
+  awardList:
+    [...DEFAULT_AWARD_LIST]
+
 };
 
-let editingRecordId = null;
+let editingRecordId =
+  null;
 
-let editingRecord = null;
+let editingRecord =
+  null;
 
-let loginInProgress = false;
+let loginInProgress =
+  false;
 
-let submitInProgress = false;
+let submitInProgress =
+  false;
 
 
 /* =========================================================
@@ -856,24 +903,27 @@ let submitInProgress = false;
 
 function showMessage(
   text,
-  type = "info"
-) {
+  type="info"
+){
 
-  messageBox.textContent = text;
+  messageBox.textContent =
+    text;
 
   messageBox.className =
     "message " + type;
 
   window.scrollTo({
-    top: 0,
-    behavior: "smooth"
+    top:0,
+    behavior:"smooth"
   });
+
 }
 
 
-function clearMessage() {
+function clearMessage(){
 
-  messageBox.textContent = "";
+  messageBox.textContent =
+    "";
 
   messageBox.className =
     "message";
@@ -887,62 +937,45 @@ function clearMessage() {
 
 googleLoginBtn.addEventListener(
   "click",
-  async () => {
+  async ()=>{
 
-    if (loginInProgress) {
+    if(loginInProgress){
       return;
     }
 
-    loginInProgress = true;
+    loginInProgress =
+      true;
 
-    googleLoginBtn.disabled = true;
+    googleLoginBtn.disabled =
+      true;
 
-    clearMessage();
-
-    try {
+    try{
 
       await signInWithPopup(
         auth,
         provider
       );
 
-    } catch (error) {
+    }catch(error){
 
       console.error(
-        "Google login error:",
+        "LOGIN ERROR",
         error
       );
 
-      let msg =
-        error?.message ||
-        "Google 登入失敗";
-
-      if (
-        error?.code ===
-        "auth/popup-closed-by-user"
-      ) {
-        msg =
-          "登入視窗已關閉。";
-      }
-
-      if (
-        error?.code ===
-        "auth/cancelled-popup-request"
-      ) {
-        msg =
-          "登入視窗重複開啟，請稍候再試。";
-      }
-
       showMessage(
-        "登入失敗：\n" + msg,
+        "Google 登入失敗：\n" +
+        getErrorMessage(error),
         "error"
       );
 
-    } finally {
+    }finally{
 
-      loginInProgress = false;
+      loginInProgress =
+        false;
 
-      googleLoginBtn.disabled = false;
+      googleLoginBtn.disabled =
+        false;
 
     }
 
@@ -956,46 +989,29 @@ googleLoginBtn.addEventListener(
 
 logoutBtn.addEventListener(
   "click",
-  async () => {
+  async ()=>{
 
-    try {
-
-      await signOut(auth);
-
-      resetForm();
-
-      showMessage(
-        "已登出。",
-        "success"
-      );
-
-    } catch (error) {
-
-      console.error(error);
-
-      showMessage(
-        "登出失敗：\n" +
-        (error.message || error),
-        "error"
-      );
-
-    }
+    await signOut(
+      auth
+    );
 
   }
 );
 
 
 /* =========================================================
-   AUTH STATE
+   AUTH
 ========================================================= */
 
 onAuthStateChanged(
   auth,
-  async user => {
+  async user=>{
 
-    currentUser = user || null;
+    currentUser =
+      user || null;
 
-    if (!user) {
+
+    if(!user){
 
       loginArea.style.display =
         "block";
@@ -1010,6 +1026,7 @@ onAuthStateChanged(
         "none";
 
       return;
+
     }
 
 
@@ -1025,14 +1042,12 @@ onAuthStateChanged(
     recordsSection.style.display =
       "block";
 
+
     userEmail.textContent =
       user.email || "";
 
 
-    clearMessage();
-
-
-    try {
+    try{
 
       await loadSettings();
 
@@ -1040,16 +1055,15 @@ onAuthStateChanged(
 
       await loadMyRecords();
 
-    } catch (error) {
+    }catch(error){
 
       console.error(
-        "Initial loading error:",
         error
       );
 
       showMessage(
-        "資料載入失敗：\n" +
-        getFriendlyError(error),
+        "頁面初始化失敗：\n" +
+        getErrorMessage(error),
         "error"
       );
 
@@ -1063,9 +1077,9 @@ onAuthStateChanged(
    SETTINGS
 ========================================================= */
 
-async function loadSettings() {
+async function loadSettings(){
 
-  try {
+  try{
 
     const ref =
       doc(
@@ -1075,68 +1089,50 @@ async function loadSettings() {
       );
 
     const snap =
-      await getDoc(ref);
+      await getDoc(
+        ref
+      );
 
-    if (snap.exists()) {
+
+    if(
+      snap.exists()
+    ){
 
       const data =
         snap.data();
 
-      currentSettings = {
 
-        platinumList:
-          Array.isArray(data.platinumList)
-            ? data.platinumList
-            : [...DEFAULT_PLATINUM_LIST],
+      if(
+        Array.isArray(
+          data.platinumList
+        )
+      ){
 
-        awardList:
-          Array.isArray(data.awardList)
-            ? data.awardList
-            : [...DEFAULT_AWARD_LIST]
+        settings.platinumList =
+          data.platinumList;
 
-      };
+      }
 
-    } else {
 
-      /*
-        普通會員不建立 settings。
-        如果不存在就使用預設值。
-      */
+      if(
+        Array.isArray(
+          data.awardList
+        )
+      ){
 
-      currentSettings = {
+        settings.awardList =
+          data.awardList;
 
-        platinumList:
-          [...DEFAULT_PLATINUM_LIST],
-
-        awardList:
-          [...DEFAULT_AWARD_LIST]
-
-      };
+      }
 
     }
 
-  } catch (error) {
-
-    /*
-      如果 settings 沒有讀取權限，
-      不要讓整個頁面死亡。
-      直接使用預設設定。
-    */
+  }catch(error){
 
     console.warn(
-      "Settings loading failed:",
+      "settings read failed",
       error
     );
-
-    currentSettings = {
-
-      platinumList:
-        [...DEFAULT_PLATINUM_LIST],
-
-      awardList:
-        [...DEFAULT_AWARD_LIST]
-
-    };
 
   }
 
@@ -1147,169 +1143,178 @@ async function loadSettings() {
    RENDER SETTINGS
 ========================================================= */
 
-function renderSettings() {
+function renderSettings(){
 
   platinumSelect.innerHTML =
     '<option value="">請選擇上線白金</option>';
 
-  currentSettings.platinumList
-    .forEach(item => {
+
+  settings.platinumList.forEach(
+    item=>{
 
       const option =
         document.createElement(
           "option"
         );
 
-      option.value = item;
+      option.value =
+        item;
 
-      option.textContent = item;
+      option.textContent =
+        item;
 
       platinumSelect.appendChild(
         option
       );
 
-    });
+    }
+  );
 
 
-  awardGrid.innerHTML = "";
+  awardGrid.innerHTML =
+    "";
 
 
-  currentSettings.awardList
-    .forEach((award, index) => {
+  settings.awardList.forEach(
+    (award,index)=>{
 
       const id =
-        "award_" + index;
+        "award_" +
+        index;
 
 
       const wrapper =
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
 
       wrapper.className =
         "award-item";
 
 
       const input =
-        document.createElement("input");
+        document.createElement(
+          "input"
+        );
 
-      input.type = "checkbox";
+      input.type =
+        "checkbox";
 
-      input.id = id;
+      input.name =
+        "awards";
 
-      input.name = "awards";
+      input.id =
+        id;
 
-      input.value = award;
+      input.value =
+        award;
 
 
       const label =
-        document.createElement("label");
+        document.createElement(
+          "label"
+        );
 
-      label.htmlFor = id;
+      label.htmlFor =
+        id;
 
-      label.textContent = award;
+      label.textContent =
+        award;
 
 
-      wrapper.appendChild(input);
+      wrapper.appendChild(
+        input
+      );
 
-      wrapper.appendChild(label);
+      wrapper.appendChild(
+        label
+      );
 
-      awardGrid.appendChild(wrapper);
 
-    });
+      awardGrid.appendChild(
+        wrapper
+      );
+
+    }
+  );
 
 }
 
 
 /* =========================================================
-   PHOTO PREVIEW
+   PHOTO
 ========================================================= */
 
 photoInput.addEventListener(
   "change",
-  async () => {
+  ()=>{
 
     const file =
       photoInput.files?.[0];
 
-    if (!file) {
 
-      photoPreviewWrap.style.display =
+    if(!file){
+
+      preview.style.display =
         "none";
 
       return;
-    }
-
-
-    if (
-      ![
-        "image/jpeg",
-        "image/jpg",
-        "image/png"
-      ].includes(file.type)
-    ) {
-
-      photoInput.value = "";
-
-      showMessage(
-        "照片只接受 JPG / JPEG / PNG。",
-        "error"
-      );
-
-      return;
-    }
-
-
-    try {
-
-      const compressed =
-        await compressImage(file);
-
-      photoPreview.src =
-        compressed.dataUrl;
-
-      photoPreviewWrap.style.display =
-        "block";
-
-    } catch (error) {
-
-      console.error(error);
-
-      showMessage(
-        "照片預覽失敗：\n" +
-        error.message,
-        "error"
-      );
 
     }
+
+
+    const reader =
+      new FileReader();
+
+
+    reader.onload =
+      event=>{
+
+        previewImg.src =
+          event.target.result;
+
+        preview.style.display =
+          "block";
+
+      };
+
+
+    reader.readAsDataURL(
+      file
+    );
 
   }
 );
 
 
 /* =========================================================
-   IMAGE COMPRESS
+   COMPRESS IMAGE
 ========================================================= */
 
 function compressImage(
   file
-) {
+){
 
   return new Promise(
-    (resolve, reject) => {
+    (resolve,reject)=>{
 
       const reader =
         new FileReader();
 
+
       reader.onload =
-        event => {
+        event=>{
 
           const img =
             new Image();
 
-          img.onload =
-            () => {
 
-              const MAX_SIZE =
+          img.onload =
+            ()=>{
+
+              const MAX =
                 1600;
+
 
               let width =
                 img.width;
@@ -1318,36 +1323,36 @@ function compressImage(
                 img.height;
 
 
-              if (
-                width > MAX_SIZE ||
-                height > MAX_SIZE
-              ) {
+              if(
+                width > MAX ||
+                height > MAX
+              ){
 
-                if (
+                if(
                   width > height
-                ) {
+                ){
 
                   height =
                     Math.round(
                       height *
-                      MAX_SIZE /
+                      MAX /
                       width
                     );
 
                   width =
-                    MAX_SIZE;
+                    MAX;
 
-                } else {
+                }else{
 
                   width =
                     Math.round(
                       width *
-                      MAX_SIZE /
+                      MAX /
                       height
                     );
 
                   height =
-                    MAX_SIZE;
+                    MAX;
 
                 }
 
@@ -1358,6 +1363,7 @@ function compressImage(
                 document.createElement(
                   "canvas"
                 );
+
 
               canvas.width =
                 width;
@@ -1371,6 +1377,7 @@ function compressImage(
                   "2d"
                 );
 
+
               ctx.drawImage(
                 img,
                 0,
@@ -1383,13 +1390,14 @@ function compressImage(
               const dataUrl =
                 canvas.toDataURL(
                   "image/jpeg",
-                  0.84
+                  .84
                 );
 
 
               resolve({
 
-                dataUrl,
+                dataUrl:
+                  dataUrl,
 
                 fileName:
                   file.name
@@ -1405,9 +1413,9 @@ function compressImage(
 
 
           img.onerror =
-            () => reject(
+            ()=>reject(
               new Error(
-                "無法讀取圖片"
+                "圖片無法讀取"
               )
             );
 
@@ -1419,14 +1427,16 @@ function compressImage(
 
 
       reader.onerror =
-        () => reject(
+        ()=>reject(
           new Error(
             "圖片讀取失敗"
           )
         );
 
 
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(
+        file
+      );
 
     }
   );
@@ -1435,45 +1445,46 @@ function compressImage(
 
 
 /* =========================================================
-   GET SELECTED AWARDS
+   SELECTED AWARDS
 ========================================================= */
 
-function getSelectedAwards() {
+function getSelectedAwards(){
 
   return [
     ...document.querySelectorAll(
       'input[name="awards"]:checked'
     )
   ].map(
-    input => input.value
+    input=>input.value
   );
 
 }
 
 
 /* =========================================================
-   FORM SUBMIT
+   SUBMIT
 ========================================================= */
 
 form.addEventListener(
   "submit",
-  async event => {
+  async event=>{
 
     event.preventDefault();
 
 
-    if (!currentUser) {
+    if(!currentUser){
 
       showMessage(
-        "請先使用 Google 登入。",
+        "請先 Google 登入。",
         "error"
       );
 
       return;
+
     }
 
 
-    if (submitInProgress) {
+    if(submitInProgress){
       return;
     }
 
@@ -1490,8 +1501,11 @@ form.addEventListener(
     const awards =
       getSelectedAwards();
 
+    const selectedPhoto =
+      photoInput.files?.[0];
 
-    if (!name) {
+
+    if(!name){
 
       showMessage(
         "請輸入表揚者姓名。",
@@ -1499,10 +1513,11 @@ form.addEventListener(
       );
 
       return;
+
     }
 
 
-    if (!occupation) {
+    if(!occupation){
 
       showMessage(
         "請輸入表揚者職業。",
@@ -1510,10 +1525,11 @@ form.addEventListener(
       );
 
       return;
+
     }
 
 
-    if (!platinum) {
+    if(!platinum){
 
       showMessage(
         "請選擇上線白金。",
@@ -1521,10 +1537,11 @@ form.addEventListener(
       );
 
       return;
+
     }
 
 
-    if (!awards.length) {
+    if(!awards.length){
 
       showMessage(
         "請至少選擇一個突破獎銜。",
@@ -1532,22 +1549,14 @@ form.addEventListener(
       );
 
       return;
+
     }
 
 
-    /*
-      新增時必須有照片。
-      編輯時可以沿用舊照片。
-    */
-
-    const newPhoto =
-      photoInput.files?.[0];
-
-
-    if (
+    if(
       !editingRecordId &&
-      !newPhoto
-    ) {
+      !selectedPhoto
+    ){
 
       showMessage(
         "請選擇表揚者照片。",
@@ -1555,67 +1564,183 @@ form.addEventListener(
       );
 
       return;
+
     }
 
 
-    submitInProgress = true;
+    submitInProgress =
+      true;
 
-    submitBtn.disabled = true;
+    submitBtn.disabled =
+      true;
 
-    cancelEditBtn.disabled = true;
+    cancelEditBtn.disabled =
+      true;
 
 
-    try {
+    let recordId =
+      editingRecordId;
 
-      clearMessage();
+    let newPhotoId =
+      null;
 
+    let oldPhotoId =
+      editingRecord?.photoFileId ||
+      "";
+
+
+    try{
+
+      /*
+        =====================================================
+        STEP 1
+        先建立 / 確認 Firestore
+        =====================================================
+      */
 
       showMessage(
-        editingRecordId
-          ? "正在更新表揚資料，請稍候……"
-          : "正在提交表揚資料，請稍候……",
+        "① 正在建立表揚資料……",
         "info"
       );
 
 
+      if(!editingRecordId){
+
+        /*
+          自己產生 document ID。
+        */
+
+        const newRef =
+          doc(
+            collection(
+              db,
+              "recognitions"
+            )
+          );
+
+
+        recordId =
+          newRef.id;
+
+
+        /*
+          注意：
+
+          這裡先不要求照片。
+          因為照片在 Drive。
+
+          Firestore 先建立，
+          成功後才上傳照片。
+        */
+
+        await setDoc(
+          newRef,
+          {
+
+            uid:
+              currentUser.uid,
+
+            email:
+              currentUser.email || "",
+
+            name:
+              name,
+
+            occupation:
+              occupation,
+
+            platinum:
+              platinum,
+
+            awards:
+              awards,
+
+            photoFileId:
+              "",
+
+            photoFileName:
+              "",
+
+            photoDriveUrl:
+              "",
+
+            createdAt:
+              serverTimestamp(),
+
+            updatedAt:
+              serverTimestamp()
+
+          }
+        );
+
+      }else{
+
+        /*
+          編輯資料。
+        */
+
+        const recordRef =
+          doc(
+            db,
+            "recognitions",
+            editingRecordId
+          );
+
+
+        await updateDoc(
+          recordRef,
+          {
+
+            uid:
+              currentUser.uid,
+
+            email:
+              currentUser.email || "",
+
+            name:
+              name,
+
+            occupation:
+              occupation,
+
+            platinum:
+              platinum,
+
+            awards:
+              awards,
+
+            updatedAt:
+              serverTimestamp()
+
+          }
+        );
+
+      }
+
+
       /*
-        -----------------------------------------------------
-        STEP 1
-        如果有新照片，先上傳 Drive
-        -----------------------------------------------------
+        =====================================================
+        STEP 2
+        Firestore 已經成功
+        現在才處理照片
+        =====================================================
       */
 
-      let photoInfo = null;
-
-      let uploadedNewPhotoId = null;
-
-
-      if (newPhoto) {
+      if(selectedPhoto){
 
         showMessage(
-          "正在處理照片……",
+          "② 表揚資料已建立，正在上傳照片……",
           "info"
         );
 
 
         const compressed =
           await compressImage(
-            newPhoto
+            selectedPhoto
           );
 
 
-        /*
-          Base64 太大會讓 Apps Script
-          Web App 很容易失敗。
-
-          這裡會控制圖片大小。
-        */
-
-        const base64 =
-          compressed.dataUrl;
-
-
-        photoInfo =
+        const photoInfo =
           await postToAppsScript({
 
             action:
@@ -1633,192 +1758,82 @@ form.addEventListener(
               "image/jpeg",
 
             base64:
-              base64
+              compressed.dataUrl
 
           });
 
 
-        uploadedNewPhotoId =
+        if(
+          !photoInfo ||
+          !photoInfo.fileId
+        ){
+
+          throw new Error(
+            "Google Drive 沒有回傳有效的照片 fileId。"
+          );
+
+        }
+
+
+        newPhotoId =
           photoInfo.fileId;
 
 
-        if (
-          !photoInfo ||
-          !photoInfo.fileId
-        ) {
-
-          throw new Error(
-            "Google Drive 沒有回傳照片 fileId。"
-          );
-
-        }
-
-      }
-
-
-      /*
-        -----------------------------------------------------
-        STEP 2
-        建立 Firestore 資料
-        -----------------------------------------------------
-      */
-
-      showMessage(
-        "照片已處理，正在寫入表揚資料……",
-        "info"
-      );
-
-
-      const now =
-        serverTimestamp();
-
-
-      if (!editingRecordId) {
-
         /*
-          新增
+          ===================================================
+          STEP 3
+          Drive 成功
+          更新 Firestore 照片資料
+          ===================================================
         */
 
-        const newDocRef =
-          doc(
-            collection(
-              db,
-              "recognitions"
-            )
-          );
-
-
-        const data = {
-
-          uid:
-            currentUser.uid,
-
-          email:
-            currentUser.email,
-
-          name:
-            name,
-
-          occupation:
-            occupation,
-
-          platinum:
-            platinum,
-
-          awards:
-            awards,
-
-          photoFileId:
-            photoInfo.fileId,
-
-          photoFileName:
-            photoInfo.fileName || "",
-
-          photoDriveUrl:
-            photoInfo.driveUrl || "",
-
-          createdAt:
-            now,
-
-          updatedAt:
-            now
-
-        };
-
-
-        /*
-          這裡使用 setDoc，
-          文件 ID 是我們自己建立的，
-          Rules 可以正常驗證。
-        */
-
-        await setDoc(
-          newDocRef,
-          data
+        showMessage(
+          "③ 照片已上傳，正在完成資料……",
+          "info"
         );
-
-
-      } else {
-
-        /*
-          編輯
-        */
-
-        const oldPhotoId =
-          editingRecord?.photoFileId || "";
-
-
-        const updateData = {
-
-          uid:
-            currentUser.uid,
-
-          email:
-            currentUser.email,
-
-          name:
-            name,
-
-          occupation:
-            occupation,
-
-          platinum:
-            platinum,
-
-          awards:
-            awards,
-
-          updatedAt:
-            now
-
-        };
-
-
-        /*
-          如果換了照片，
-          Firestore 改成新照片。
-        */
-
-        if (photoInfo) {
-
-          updateData.photoFileId =
-            photoInfo.fileId;
-
-          updateData.photoFileName =
-            photoInfo.fileName || "";
-
-          updateData.photoDriveUrl =
-            photoInfo.driveUrl || "";
-
-        }
 
 
         const recordRef =
           doc(
             db,
             "recognitions",
-            editingRecordId
+            recordId
           );
 
 
         await updateDoc(
           recordRef,
-          updateData
+          {
+
+            photoFileId:
+              photoInfo.fileId,
+
+            photoFileName:
+              photoInfo.fileName || "",
+
+            photoDriveUrl:
+              photoInfo.driveUrl || "",
+
+            updatedAt:
+              serverTimestamp()
+
+          }
         );
 
 
         /*
-          Firestore 成功後，
+          編輯換照片：
+          Firestore 已經成功，
           才刪除舊照片。
         */
 
-        if (
-          photoInfo &&
+        if(
+          editingRecordId &&
           oldPhotoId &&
-          oldPhotoId !== photoInfo.fileId
-        ) {
+          oldPhotoId !== newPhotoId
+        ){
 
-          try {
+          try{
 
             await postToAppsScript({
 
@@ -1835,16 +1850,11 @@ form.addEventListener(
 
             });
 
-          } catch (deleteError) {
-
-            /*
-              舊照片刪除失敗，
-              不影響新的表揚資料。
-            */
+          }catch(error){
 
             console.warn(
-              "舊照片刪除失敗:",
-              deleteError
+              "舊照片刪除失敗",
+              error
             );
 
           }
@@ -1855,16 +1865,15 @@ form.addEventListener(
 
 
       /*
-        -----------------------------------------------------
-        STEP 3
+        =====================================================
         成功
-        -----------------------------------------------------
+        =====================================================
       */
 
       showMessage(
         editingRecordId
-          ? "表揚資料更新成功！"
-          : "表揚資料提交成功！",
+          ? "✅ 表揚資料修改成功！"
+          : "✅ 表揚資料提交成功！",
         "success"
       );
 
@@ -1875,26 +1884,61 @@ form.addEventListener(
       await loadMyRecords();
 
 
-    } catch (error) {
+    }catch(error){
 
       console.error(
-        "SUBMIT ERROR:",
+        "FINAL SUBMIT ERROR:",
         error
       );
 
 
       /*
-        如果照片已經上傳，
-        但 Firestore 失敗，
-        把剛剛上傳的新照片移到垃圾桶。
+        =====================================================
+        如果：
+
+        Firestore 已建立
+        +
+        Drive 也建立
+        +
+        最後 Firestore update 失敗
+
+        這時候刪除剛剛的 Drive 照片，
+        並把新建的 Firestore record 刪掉。
+        =====================================================
       */
 
-      if (
-        uploadedNewPhotoId &&
-        !editingRecordId
-      ) {
+      if(
+        !editingRecordId &&
+        recordId
+      ){
 
-        try {
+        try{
+
+          await deleteDoc(
+            doc(
+              db,
+              "recognitions",
+              recordId
+            )
+          );
+
+        }catch(cleanupError){
+
+          console.warn(
+            "Firestore cleanup failed",
+            cleanupError
+          );
+
+        }
+
+      }
+
+
+      if(
+        newPhotoId
+      ){
+
+        try{
 
           await postToAppsScript({
 
@@ -1907,14 +1951,14 @@ form.addEventListener(
               ),
 
             fileId:
-              uploadedNewPhotoId
+              newPhotoId
 
           });
 
-        } catch (cleanupError) {
+        }catch(cleanupError){
 
           console.warn(
-            "清理失敗的照片失敗:",
+            "Drive cleanup failed",
             cleanupError
           );
 
@@ -1924,12 +1968,18 @@ form.addEventListener(
 
 
       showMessage(
-        "提交失敗：\n" +
-        getFriendlyError(error),
+        "❌ 提交失敗：\n\n" +
+        getErrorMessage(error),
         "error"
       );
 
-    } finally {
+
+      /*
+        這次會把真正 Firebase error code
+        顯示出來。
+      */
+
+    }finally{
 
       submitInProgress =
         false;
@@ -1947,77 +1997,10 @@ form.addEventListener(
 
 
 /* =========================================================
-   FRIENDLY FIREBASE ERROR
-========================================================= */
-
-function getFriendlyError(
-  error
-) {
-
-  const code =
-    error?.code || "";
-
-  const message =
-    error?.message ||
-    String(error);
-
-
-  if (
-    code ===
-    "permission-denied"
-  ) {
-
-    return (
-      "Firestore 權限被拒絕。\n\n" +
-      "請確認 Firebase Firestore Rules 已經使用本頁提供的最新版本。\n\n" +
-      "原始錯誤：\n" +
-      message
-    );
-
-  }
-
-
-  if (
-    message.includes(
-      "Missing or insufficient permissions"
-    )
-  ) {
-
-    return (
-      "Firestore 權限被拒絕。\n\n" +
-      "請確認 Firebase Firestore Rules 已經更新並 Publish。\n\n" +
-      "原始錯誤：\n" +
-      message
-    );
-
-  }
-
-
-  if (
-    message.includes(
-      "Google Drive 服務逾時"
-    )
-  ) {
-
-    return (
-      "Google Drive 沒有在指定時間內回覆。\n\n" +
-      "如果 Google Drive 已經出現照片，代表照片可能已成功建立。\n\n" +
-      message
-    );
-
-  }
-
-
-  return message;
-
-}
-
-
-/* =========================================================
    LOAD MY RECORDS
 ========================================================= */
 
-async function loadMyRecords() {
+async function loadMyRecords(){
 
   recordsLoading.style.display =
     "block";
@@ -2026,26 +2009,7 @@ async function loadMyRecords() {
     "";
 
 
-  if (!currentUser) {
-
-    recordsLoading.textContent =
-      "請先登入。";
-
-    return;
-
-  }
-
-
-  try {
-
-    /*
-      最重要的修改：
-
-      不使用 orderBy，
-      不需要建立 Firestore index。
-
-      只使用 uid == currentUser.uid。
-    */
+  try{
 
     const q =
       query(
@@ -2062,7 +2026,9 @@ async function loadMyRecords() {
 
 
     const snapshot =
-      await getDocs(q);
+      await getDocs(
+        q
+      );
 
 
     const records =
@@ -2070,14 +2036,14 @@ async function loadMyRecords() {
 
 
     snapshot.forEach(
-      docSnap => {
+      snap=>{
 
         records.push({
 
           id:
-            docSnap.id,
+            snap.id,
 
-          ...docSnap.data()
+          ...snap.data()
 
         });
 
@@ -2085,24 +2051,20 @@ async function loadMyRecords() {
     );
 
 
-    /*
-      client-side 排序
-    */
-
     records.sort(
-      (a, b) => {
+      (a,b)=>{
 
-        const aTime =
-          getTimestampValue(
+        const at =
+          timestampValue(
             a.createdAt
           );
 
-        const bTime =
-          getTimestampValue(
+        const bt =
+          timestampValue(
             b.createdAt
           );
 
-        return bTime - aTime;
+        return bt-at;
 
       }
     );
@@ -2112,13 +2074,14 @@ async function loadMyRecords() {
       "none";
 
 
-    if (!records.length) {
+    if(!records.length){
 
-      recordsList.innerHTML = `
+      recordsList.innerHTML =
+        `
         <div class="empty">
           目前還沒有表揚資料。
         </div>
-      `;
+        `;
 
       return;
 
@@ -2126,7 +2089,7 @@ async function loadMyRecords() {
 
 
     records.forEach(
-      record => {
+      record=>{
 
         recordsList.appendChild(
           createRecordElement(
@@ -2138,10 +2101,10 @@ async function loadMyRecords() {
     );
 
 
-  } catch (error) {
+  }catch(error){
 
     console.error(
-      "LOAD RECORDS ERROR:",
+      "LOAD ERROR",
       error
     );
 
@@ -2150,14 +2113,16 @@ async function loadMyRecords() {
       "none";
 
 
-    recordsList.innerHTML = `
-      <div class="message error" style="display:block;">
+    recordsList.innerHTML =
+      `
+      <div class="message error"
+           style="display:block;">
         無法讀取資料。<br><br>
         ${escapeHtml(
-          getFriendlyError(error)
+          getErrorMessage(error)
         )}
       </div>
-    `;
+      `;
 
   }
 
@@ -2165,52 +2130,12 @@ async function loadMyRecords() {
 
 
 /* =========================================================
-   TIMESTAMP
-========================================================= */
-
-function getTimestampValue(
-  value
-) {
-
-  if (!value) {
-    return 0;
-  }
-
-
-  if (
-    typeof value.toMillis ===
-    "function"
-  ) {
-
-    return value.toMillis();
-
-  }
-
-
-  if (
-    value.seconds !== undefined
-  ) {
-
-    return (
-      Number(value.seconds) *
-      1000
-    );
-
-  }
-
-
-  return 0;
-
-}
-
-
-/* =========================================================
-   CREATE RECORD ELEMENT
+   RECORD
 ========================================================= */
 
 function createRecordElement(
   record
-) {
+){
 
   const wrapper =
     document.createElement(
@@ -2239,12 +2164,14 @@ function createRecordElement(
     "record-photo";
 
 
-  if (record.photoDriveUrl) {
+  if(
+    record.photoDriveUrl
+  ){
 
     img.src =
       record.photoDriveUrl;
 
-  } else {
+  }else{
 
     img.style.display =
       "none";
@@ -2279,13 +2206,9 @@ function createRecordElement(
     "record-meta";
 
   meta.textContent =
-    [
-      record.occupation || "",
-      "上線白金：" +
-      (record.platinum || "")
-    ]
-      .filter(Boolean)
-      .join(" ｜ ");
+    (record.occupation || "") +
+    " ｜ 上線白金：" +
+    (record.platinum || "");
 
 
   const tags =
@@ -2298,11 +2221,13 @@ function createRecordElement(
 
 
   (
-    Array.isArray(record.awards)
+    Array.isArray(
+      record.awards
+    )
       ? record.awards
       : []
   ).forEach(
-    award => {
+    award=>{
 
       const tag =
         document.createElement(
@@ -2323,16 +2248,26 @@ function createRecordElement(
   );
 
 
-  content.appendChild(name);
+  content.appendChild(
+    name
+  );
 
-  content.appendChild(meta);
+  content.appendChild(
+    meta
+  );
 
-  content.appendChild(tags);
+  content.appendChild(
+    tags
+  );
 
 
-  main.appendChild(img);
+  main.appendChild(
+    img
+  );
 
-  main.appendChild(content);
+  main.appendChild(
+    content
+  );
 
 
   const actions =
@@ -2349,24 +2284,22 @@ function createRecordElement(
       "button"
     );
 
-  editBtn.type =
-    "button";
-
   editBtn.className =
     "btn btn-dark btn-small";
 
   editBtn.textContent =
     "修改";
 
+  editBtn.type =
+    "button";
 
-  editBtn.addEventListener(
-    "click",
-    () => {
 
-      startEdit(record);
-
-    }
-  );
+  editBtn.onclick =
+    ()=>{
+      startEdit(
+        record
+      );
+    };
 
 
   const deleteBtn =
@@ -2374,26 +2307,22 @@ function createRecordElement(
       "button"
     );
 
-  deleteBtn.type =
-    "button";
-
   deleteBtn.className =
     "btn btn-danger btn-small";
 
   deleteBtn.textContent =
     "刪除";
 
+  deleteBtn.type =
+    "button";
 
-  deleteBtn.addEventListener(
-    "click",
-    () => {
 
+  deleteBtn.onclick =
+    ()=>{
       deleteRecord(
         record
       );
-
-    }
-  );
+    };
 
 
   actions.appendChild(
@@ -2420,12 +2349,12 @@ function createRecordElement(
 
 
 /* =========================================================
-   START EDIT
+   EDIT
 ========================================================= */
 
 function startEdit(
   record
-) {
+){
 
   editingRecordId =
     record.id;
@@ -2455,7 +2384,7 @@ function startEdit(
       'input[name="awards"]'
     )
     .forEach(
-      input => {
+      input=>{
 
         input.checked =
           Array.isArray(
@@ -2473,21 +2402,13 @@ function startEdit(
     "";
 
 
-  if (record.photoDriveUrl) {
-
-    existingPhoto.innerHTML =
-      "目前照片已儲存在 Google Drive。<br>" +
-      "如果不選新照片，會繼續使用目前照片。";
-
-  } else {
-
-    existingPhoto.textContent =
-      "";
-
-  }
+  existingPhoto.textContent =
+    record.photoFileId
+      ? "目前已有照片。如果不選新照片，會保留原照片。"
+      : "";
 
 
-  photoPreviewWrap.style.display =
+  preview.style.display =
     "none";
 
 
@@ -2500,33 +2421,30 @@ function startEdit(
 
 
   formSection.scrollIntoView({
-    behavior: "smooth"
+    behavior:"smooth"
   });
 
 }
 
 
 /* =========================================================
-   CANCEL EDIT
+   CANCEL
 ========================================================= */
 
 cancelEditBtn.addEventListener(
   "click",
-  () => {
-
+  ()=>{
     resetForm();
-
     clearMessage();
-
   }
 );
 
 
 /* =========================================================
-   RESET FORM
+   RESET
 ========================================================= */
 
-function resetForm() {
+function resetForm(){
 
   editingRecordId =
     null;
@@ -2554,47 +2472,43 @@ function resetForm() {
     "";
 
 
-  photoPreviewWrap.style.display =
+  preview.style.display =
     "none";
 
 }
 
 
 /* =========================================================
-   DELETE RECORD
+   DELETE
 ========================================================= */
 
 async function deleteRecord(
   record
-) {
+){
 
-  if (!currentUser) {
+  if(!currentUser){
     return;
   }
 
 
-  const confirmed =
-    confirm(
-      `確定要刪除「${record.name || ""}」的表揚資料嗎？\n\n此操作無法復原。`
-    );
-
-
-  if (!confirmed) {
+  if(
+    !confirm(
+      "確定要刪除「" +
+      record.name +
+      "」嗎？"
+    )
+  ){
     return;
   }
 
 
-  try {
+  try{
 
     showMessage(
       "正在刪除資料……",
       "info"
     );
 
-
-    /*
-      先刪 Firestore。
-    */
 
     await deleteDoc(
       doc(
@@ -2605,14 +2519,11 @@ async function deleteRecord(
     );
 
 
-    /*
-      Firestore 成功後，
-      再刪 Drive 照片。
-    */
+    if(
+      record.photoFileId
+    ){
 
-    if (record.photoFileId) {
-
-      try {
+      try{
 
         await postToAppsScript({
 
@@ -2629,11 +2540,11 @@ async function deleteRecord(
 
         });
 
-      } catch (driveError) {
+      }catch(error){
 
         console.warn(
-          "Drive photo delete failed:",
-          driveError
+          "Drive delete failed",
+          error
         );
 
       }
@@ -2642,7 +2553,7 @@ async function deleteRecord(
 
 
     showMessage(
-      "表揚資料已刪除。",
+      "資料已刪除。",
       "success"
     );
 
@@ -2650,13 +2561,16 @@ async function deleteRecord(
     await loadMyRecords();
 
 
-  } catch (error) {
+  }catch(error){
 
-    console.error(error);
+    console.error(
+      error
+    );
+
 
     showMessage(
       "刪除失敗：\n" +
-      getFriendlyError(error),
+      getErrorMessage(error),
       "error"
     );
 
@@ -2671,46 +2585,33 @@ async function deleteRecord(
 
 function postToAppsScript(
   data
-) {
+){
 
   return new Promise(
-    (resolve, reject) => {
+    (resolve,reject)=>{
+
+      if(
+        !APPS_SCRIPT_URL ||
+        !APPS_SCRIPT_URL.includes(
+          "script.google.com/macros/s/"
+        )
+      ){
+
+        reject(
+          new Error(
+            "Apps Script /exec URL 沒有正確設定。"
+          )
+        );
+
+        return;
+
+      }
+
 
       const iframe =
         document.getElementById(
           "gasFrame"
         );
-
-
-      if (!iframe) {
-
-        reject(
-          new Error(
-            "找不到 Google Apps Script iframe。"
-          )
-        );
-
-        return;
-
-      }
-
-
-      if (
-        !APPS_SCRIPT_URL ||
-        APPS_SCRIPT_URL.includes(
-          "xxxxxxxx"
-        )
-      ) {
-
-        reject(
-          new Error(
-            "APPS_SCRIPT_URL 尚未設定成真正的 Apps Script /exec URL。"
-          )
-        );
-
-        return;
-
-      }
 
 
       const form =
@@ -2734,7 +2635,7 @@ function postToAppsScript(
 
       Object.keys(data)
         .forEach(
-          key => {
+          key=>{
 
             const input =
               document.createElement(
@@ -2767,26 +2668,22 @@ function postToAppsScript(
         false;
 
 
-      /*
-        這裡提高到 5 分鐘。
-        不再使用原本 60 / 120 秒。
-      */
-
       const timeout =
         setTimeout(
-          () => {
+          ()=>{
 
-            if (finished) {
+            if(finished){
               return;
             }
 
-            finished = true;
+            finished =
+              true;
 
             cleanup();
 
             reject(
               new Error(
-                "Google Drive 服務逾時，請稍後再試。"
+                "Google Drive 服務逾時。"
               )
             );
 
@@ -2795,7 +2692,7 @@ function postToAppsScript(
         );
 
 
-      function cleanup() {
+      function cleanup(){
 
         clearTimeout(
           timeout
@@ -2803,78 +2700,69 @@ function postToAppsScript(
 
         window.removeEventListener(
           "message",
-          messageHandler
+          onMessage
         );
 
-        try {
-
+        try{
           form.remove();
-
-        } catch (e) {}
+        }catch(e){}
 
       }
 
 
-      function messageHandler(
+      function onMessage(
         event
-      ) {
+      ){
 
         const result =
           event.data;
 
 
-        if (
+        if(
           !result ||
           typeof result !== "object"
-        ) {
-
+        ){
           return;
-
         }
 
 
-        /*
-          Apps Script 回應只接受我們的 action。
-        */
-
-        if (
+        if(
           result.action !==
             "uploadPhoto" &&
           result.action !==
             "deletePhoto" &&
           result.action !==
             "generatePpt"
-        ) {
-
-          return;
-
-        }
-
-
-        if (finished) {
+        ){
           return;
         }
 
 
-        finished = true;
+        if(finished){
+          return;
+        }
+
+
+        finished =
+          true;
 
         cleanup();
 
 
-        if (
+        if(
           result.success
-        ) {
+        ){
 
           resolve(
             result.result
           );
 
-        } else {
+        }else{
 
           reject(
             new Error(
               result.error ||
-              "Google Apps Script 執行失敗"
+              "Apps Script 執行失敗"
             )
           );
 
@@ -2885,19 +2773,20 @@ function postToAppsScript(
 
       window.addEventListener(
         "message",
-        messageHandler
+        onMessage
       );
 
 
-      try {
+      try{
 
         form.submit();
 
-      } catch (error) {
+      }catch(error){
 
-        if (!finished) {
+        if(!finished){
 
-          finished = true;
+          finished =
+            true;
 
           cleanup();
 
@@ -2916,12 +2805,85 @@ function postToAppsScript(
 
 
 /* =========================================================
-   ESCAPE HTML
+   ERROR
+========================================================= */
+
+function getErrorMessage(
+  error
+){
+
+  if(!error){
+    return "未知錯誤";
+  }
+
+
+  const code =
+    error.code || "";
+
+
+  const message =
+    error.message ||
+    String(error);
+
+
+  return (
+    "錯誤代碼：" +
+    (code || "無") +
+    "\n\n" +
+    "錯誤內容：" +
+    message
+  );
+
+}
+
+
+/* =========================================================
+   TIMESTAMP
+========================================================= */
+
+function timestampValue(
+  value
+){
+
+  if(!value){
+    return 0;
+  }
+
+
+  if(
+    typeof value.toMillis ===
+    "function"
+  ){
+
+    return value.toMillis();
+
+  }
+
+
+  if(
+    value.seconds !== undefined
+  ){
+
+    return (
+      Number(value.seconds) *
+      1000
+    );
+
+  }
+
+
+  return 0;
+
+}
+
+
+/* =========================================================
+   ESCAPE
 ========================================================= */
 
 function escapeHtml(
   value
-) {
+){
 
   return String(value)
     .replace(
