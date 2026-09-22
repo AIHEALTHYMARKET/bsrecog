@@ -1,3 +1,8 @@
+// ============================================================
+// BS GLOBAL Recognition System
+// Firebase Configuration
+// ============================================================
+
 const firebaseConfig = {
     apiKey: "AIzaSyDpWeR78Lwfi9mDOS4mCzUsTYVI7SOsDV",
     authDomain: "bsrecog.firebaseapp.com",
@@ -9,20 +14,33 @@ const firebaseConfig = {
 };
 
 
+// ============================================================
 // Google Apps Script Web App
+// ============================================================
+
 const APPS_SCRIPT_URL =
     "https://script.google.com/macros/s/AKfycbycfMlsXP84tZxRB22oDpoAEStBqvi_dt3zhVsEzNJ9YKL75XEKIca-ZEl8weMl_iqe/exec";
 
 
-// 管理員 Google Email
+// ============================================================
+// Administrator
+// ============================================================
+
 const ADMIN_EMAIL =
     "diabolo.weien@gmail.com";
 
 
-// Google Drive 照片資料夾
+// ============================================================
+// Google Drive Photo Folder
+// ============================================================
+
 const PHOTO_FOLDER_ID =
     "1TmPzlU-txD8klUzoOf_rLIMUNNpp7Ejv";
 
+
+// ============================================================
+// Export
+// ============================================================
 
 export {
     firebaseConfig,
