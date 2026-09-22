@@ -2583,6 +2583,11 @@ async function deleteRecord(
    APPS SCRIPT POST
 ========================================================= */
 
+/* =========================================================
+   APPS SCRIPT POST
+   完整新版
+========================================================= */
+
 function postToAppsScript(
   data
 ){
@@ -2614,6 +2619,57 @@ function postToAppsScript(
         );
 
 
+      if(!iframe){
+
+        reject(
+          new Error(
+            "找不到 gasFrame iframe。"
+          )
+        );
+
+        return;
+
+      }
+
+
+      /*
+       * ===================================================
+       * 建立唯一 requestId
+       * ===================================================
+       */
+
+      const requestId =
+        "req_" +
+        Date.now() +
+        "_" +
+        Math.random()
+          .toString(36)
+          .substring(
+            2,
+            10
+          );
+
+
+      /*
+       * 將 requestId 一起傳給 Apps Script
+       */
+
+      const requestData = {
+
+        ...data,
+
+        requestId:
+          requestId
+
+      };
+
+
+      /*
+       * ===================================================
+       * 建立 POST FORM
+       * ===================================================
+       */
+
       const form =
         document.createElement(
           "form"
@@ -2623,40 +2679,49 @@ function postToAppsScript(
       form.method =
         "POST";
 
+
       form.action =
         APPS_SCRIPT_URL;
 
+
       form.target =
         "gasFrame";
+
 
       form.style.display =
         "none";
 
 
-      Object.keys(data)
-        .forEach(
-          key=>{
+      Object.keys(
+        requestData
+      )
+      .forEach(
+        key=>{
 
-            const input =
-              document.createElement(
-                "input"
-              );
-
-            input.type =
-              "hidden";
-
-            input.name =
-              key;
-
-            input.value =
-              data[key] ?? "";
-
-            form.appendChild(
-              input
+          const input =
+            document.createElement(
+              "input"
             );
 
-          }
-        );
+
+          input.type =
+            "hidden";
+
+
+          input.name =
+            key;
+
+
+          input.value =
+            requestData[key] ?? "";
+
+
+          form.appendChild(
+            input
+          );
+
+        }
+      );
 
 
       document.body.appendChild(
@@ -2664,26 +2729,48 @@ function postToAppsScript(
       );
 
 
+      /*
+       * ===================================================
+       * 狀態
+       * ===================================================
+       */
+
       let finished =
         false;
 
+
+      /*
+       * ===================================================
+       * 5 分鐘逾時
+       * ===================================================
+       */
 
       const timeout =
         setTimeout(
           ()=>{
 
-            if(finished){
+            if(
+              finished
+            ){
+
               return;
+
             }
+
 
             finished =
               true;
 
+
             cleanup();
+
 
             reject(
               new Error(
-                "Google Drive 服務逾時。"
+                "Google Drive 服務回覆逾時。\n\n" +
+                "照片可能已經成功上傳到 Google Drive，" +
+                "但前端沒有收到 Apps Script 的完成訊號。\n\n" +
+                "請先不要重複提交。"
               )
             );
 
@@ -2692,23 +2779,39 @@ function postToAppsScript(
         );
 
 
+      /*
+       * ===================================================
+       * 清理
+       * ===================================================
+       */
+
       function cleanup(){
 
         clearTimeout(
           timeout
         );
 
+
         window.removeEventListener(
           "message",
           onMessage
         );
 
+
         try{
+
           form.remove();
-        }catch(e){}
+
+        }catch(error){}
 
       }
 
+
+      /*
+       * ===================================================
+       * 收到 Apps Script 回覆
+       * ===================================================
+       */
 
       function onMessage(
         event
@@ -2718,36 +2821,80 @@ function postToAppsScript(
           event.data;
 
 
+        /*
+         * 必須是 object
+         */
+
         if(
           !result ||
-          typeof result !== "object"
+          typeof result !==
+          "object"
         ){
+
           return;
+
         }
 
+
+        /*
+         * 只接受我們需要的 action
+         */
 
         if(
           result.action !==
             "uploadPhoto" &&
+
           result.action !==
             "deletePhoto" &&
+
           result.action !==
             "generatePpt"
         ){
+
           return;
+
         }
 
 
-        if(finished){
+        /*
+         * 如果有 requestId，
+         * 必須是目前這次請求。
+         */
+
+        if(
+          result.requestId &&
+          result.requestId !==
+          requestId
+        ){
+
           return;
+
+        }
+
+
+        /*
+         * 已經完成就不要再處理。
+         */
+
+        if(
+          finished
+        ){
+
+          return;
+
         }
 
 
         finished =
           true;
 
+
         cleanup();
 
+
+        /*
+         * 成功
+         */
 
         if(
           result.success
@@ -2757,19 +2904,31 @@ function postToAppsScript(
             result.result
           );
 
-        }else{
-
-          reject(
-            new Error(
-              result.error ||
-              "Apps Script 執行失敗"
-            )
-          );
+          return;
 
         }
 
+
+        /*
+         * Apps Script 回傳錯誤
+         */
+
+        reject(
+          new Error(
+            result.error ||
+            "Apps Script 執行失敗"
+          )
+        );
+
       }
 
+
+      /*
+       * ===================================================
+       * 一定先監聽 message
+       * 再 submit
+       * ===================================================
+       */
 
       window.addEventListener(
         "message",
@@ -2783,12 +2942,16 @@ function postToAppsScript(
 
       }catch(error){
 
-        if(!finished){
+        if(
+          !finished
+        ){
 
           finished =
             true;
 
+
           cleanup();
+
 
           reject(
             error
@@ -2802,7 +2965,6 @@ function postToAppsScript(
   );
 
 }
-
 
 /* =========================================================
    ERROR
