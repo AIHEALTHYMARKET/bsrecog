@@ -1,10 +1,14 @@
 // ============================================================
 // BS GLOBAL Recognition System
-// Firebase 設定
+// Firebase + Google Apps Script Configuration
 // ============================================================
 
-export const firebaseConfig = {
-  apiKey: "AIzaSyDpWeR78Lwfi9mDOS4mCzUsTYVI7SOsDVY",
+// =========================
+// Firebase Configuration
+// =========================
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDpWeR78Lwfi9mDOS4mCzUsTYVI7SOsDV",
   authDomain: "bsrecog.firebaseapp.com",
   projectId: "bsrecog",
   storageBucket: "bsrecog.firebasestorage.app",
@@ -13,17 +17,52 @@ export const firebaseConfig = {
   measurementId: "G-JEPWHQ6FQ9"
 };
 
-// ============================================================
-// Google Apps Script Web App
-// ⚠️ 把下面這個網址換成你自己的 /exec 網址
-// ============================================================
 
-export const APPS_SCRIPT_URL =
+// =========================
+// Google Apps Script Web App
+// =========================
+//
+// 這個網址就是目前已經測試過
+// 「Web App GET 正常」的 Apps Script /exec
+//
+
+const APPS_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbycfMlsXP84tZxRB22oDpoAEStBqvi_dt3zhVsEzNJ9YKL75XEKIca-ZEl8weMl_iqe/exec";
 
-// ============================================================
-// 管理員 Google Email
-// ============================================================
 
-export const ADMIN_EMAIL =
-  "diabolo.weien@gmail.com";
+// =========================
+// Administrator
+// =========================
+
+const ADMIN_EMAIL = "diabolo.weien@gmail.com";
+
+
+// =========================
+// Google Drive Photo Folder
+// =========================
+
+const PHOTO_FOLDER_ID =
+  "1TmPzlU-txD8klUzoOf_rLIMUNNpp7Ejv";
+
+
+// =========================
+// Export
+// =========================
+//
+// 讓 admin.html 可以直接使用：
+//
+// import {
+//   firebaseConfig,
+//   APPS_SCRIPT_URL,
+//   ADMIN_EMAIL,
+//   PHOTO_FOLDER_ID
+// } from "./js/firebase-config.js";
+//
+// =========================
+
+export {
+  firebaseConfig,
+  APPS_SCRIPT_URL,
+  ADMIN_EMAIL,
+  PHOTO_FOLDER_ID
+};
