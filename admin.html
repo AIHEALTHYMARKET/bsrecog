@@ -1928,15 +1928,13 @@ function postToAppsScript(fields) {
  
         try {
  
-            const response =
-                await fetch(
-                    APPS_SCRIPT_URL,
-                    {
-                        method: "POST",
-                        body: body,
-                        signal: controller.signal
-                    }
-                );
+            const response = await fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    body: body,
+    credentials: "omit",   // 加這行
+    signal: controller.signal
+});
+                
  
             clearTimeout(timeoutId);
  
