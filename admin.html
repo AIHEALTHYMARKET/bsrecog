@@ -2132,43 +2132,49 @@ document
                 /*
                  * 只傳 PPT 需要的資料
                  */
-                const pptRecords =
-                    records.map(
-                        record => ({
-
-                            id:
-                                record.id,
-
-                            name:
-                                record.name ||
-                                "",
-
-                            occupation:
-                                record.occupation ||
-                                "",
-
-                            platinum:
-                                record.platinum ||
-                                "",
-
-                            awards:
-                                Array.isArray(
-                                    record.awards
-                                )
-                                    ? record.awards
-                                    : [],
-
-                            photoFileId:
-                                record.photoFileId ||
-                                "",
-
-                            photoFileName:
-                                record.photoFileName ||
-                                ""
-
-                        })
-                    );
-
+                
+const pptRecords =
+    records.map(
+        record => ({
+ 
+            id:
+                record.id,
+ 
+            name:
+                record.name ||
+                "",
+ 
+            occupation:
+                record.occupation ||
+                "",
+ 
+            platinum:
+                record.platinum ||
+                "",
+ 
+            awards:
+                Array.isArray(
+                    record.awards
+                )
+                    ? record.awards
+                    : [],
+ 
+            photoFileId:
+                record.photoFileId ||
+                "",
+ 
+            photoFileName:
+                record.photoFileName ||
+                "",
+ 
+            /* 新增這一行 —— 填寫者 Email */
+            email:
+                record.email ||
+                ""
+ 
+        })
+    );
+ 
 
                 resultBox.innerHTML = `
 
