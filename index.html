@@ -118,6 +118,41 @@ select:focus{ border-color:#d4af37; }
   border:1px solid rgba(80,140,210,.35); color:#a9cdf2;
 }
 
+/* 場次提示 */
+
+.event-banner{
+  padding:12px 14px; border-radius:11px; margin-bottom:18px;
+  font-size:14px; line-height:1.6; font-weight:700;
+}
+
+.event-banner.ok{
+  background:rgba(212,175,55,.10);
+  border:1px solid rgba(212,175,55,.35);
+  color:#f4d86b;
+}
+
+.event-banner.warn{
+  background:rgba(150,40,40,.16);
+  border:1px solid rgba(210,80,80,.35);
+  color:#ffaaaa;
+}
+
+/* 場次分頁 */
+
+.event-tabs{
+  display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;
+}
+
+.event-tab{
+  border:1px solid #3a3a3a; background:#111; color:#bbb;
+  border-radius:999px; padding:9px 14px;
+  font-size:13px; font-weight:700; cursor:pointer;
+}
+
+.event-tab.active{
+  border-color:#d4af37; background:rgba(212,175,55,.14); color:#f4d86b;
+}
+
 .record{
   border:1px solid #343434; background:#101010;
   border-radius:14px; padding:16px; margin-bottom:12px;
@@ -147,6 +182,10 @@ select:focus{ border-color:#d4af37; }
 
 .record-actions{ display:flex; gap:8px; margin-top:14px; }
 
+.record-locked{
+  margin-top:14px; color:#888; font-size:12px;
+}
+
 .empty{
   text-align:center; padding:28px 10px; color:#777;
   border:1px dashed #333; border-radius:12px;
@@ -156,7 +195,7 @@ select:focus{ border-color:#d4af37; }
 
 .preview{ display:none; margin-top:12px; text-align:center; }
 
-.preview img{ max-width:240px; max-height:280px; border-radius:14px; }
+.preview img{ max-width:240px; max-height:320px; border-radius:14px; }
 
 .admin-link{ text-align:center; margin:30px 0 50px; }
 
@@ -259,6 +298,11 @@ select:focus{ border-color:#d4af37; }
     </span>
   </div>
 
+  <div
+    id="eventBanner"
+    class="event-banner ok">
+  </div>
+
 
   <form id="recognitionForm">
 
@@ -328,7 +372,8 @@ select:focus{ border-color:#d4af37; }
           accept="image/jpeg,image/jpg,image/png">
 
         <div class="hint">
-          選填。JPG / JPEG / PNG。系統會自動壓縮。
+          選填。JPG / JPEG / PNG。
+          系統會自動置中裁切成直向 3:4 並壓縮。
           沒有上傳照片時，簡報會使用預設照片。
         </div>
 
@@ -402,6 +447,11 @@ select:focus{ border-color:#d4af37; }
   </div>
 
   <div
+    id="eventTabs"
+    class="event-tabs">
+  </div>
+
+  <div
     id="recordsLoading"
     class="loading">
     正在讀取資料……
@@ -440,11 +490,16 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 
 import {
+  initializeAuth,
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  indexedDBLocalPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence,
+  browserPopupRedirectResolver
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 import {
@@ -530,8 +585,11 @@ const DEFAULT_AWARD_LIST = [
   "Founder Platinum"
 ];
 
-// 列表縮圖的最大邊長（像素）
-const THUMB_MAX = 240;
+// 上傳到 Drive 的照片：直向 3:4，最大寬度（高度 = 寬 x 4/3）
+const UPLOAD_MAX_W = 960;
+
+// 列表縮圖：直向 3:4，最大寬度
+const THUMB_MAX_W = 180;
 
 
 /* =========================================================
@@ -539,7 +597,33 @@ const THUMB_MAX = 240;
 ========================================================= */
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+
+/*
+  登入狀態保存：依序嘗試 IndexedDB → localStorage → sessionStorage，
+  避免某些瀏覽器無法使用 IndexedDB 時登入狀態很快消失。
+*/
+
+let auth;
+
+try {
+
+  auth = initializeAuth(app, {
+    persistence: [
+      indexedDBLocalPersistence,
+      browserLocalPersistence,
+      browserSessionPersistence
+    ],
+    popupRedirectResolver: browserPopupRedirectResolver
+  });
+
+} catch (error) {
+
+  console.warn("initializeAuth 失敗，改用 getAuth", error);
+
+  auth = getAuth(app);
+
+}
+
 const db = getFirestore(app);
 
 const provider = new GoogleAuthProvider();
@@ -559,6 +643,7 @@ const formSection = document.getElementById("formSection");
 const recordsSection = document.getElementById("recordsSection");
 const form = document.getElementById("recognitionForm");
 const formTitle = document.getElementById("formTitle");
+const eventBanner = document.getElementById("eventBanner");
 const nameInput = document.getElementById("name");
 const occupationInput = document.getElementById("occupation");
 const platinumSelect = document.getElementById("platinum");
@@ -569,6 +654,7 @@ const previewImg = document.getElementById("previewImg");
 const awardGrid = document.getElementById("awardGrid");
 const submitBtn = document.getElementById("submitBtn");
 const cancelEditBtn = document.getElementById("cancelEditBtn");
+const eventTabs = document.getElementById("eventTabs");
 const recordsLoading = document.getElementById("recordsLoading");
 const recordsList = document.getElementById("recordsList");
 const messageBox = document.getElementById("message");
@@ -582,13 +668,23 @@ let currentUser = null;
 
 let settings = {
   platinumList: [...DEFAULT_PLATINUM_LIST],
-  awardList: [...DEFAULT_AWARD_LIST]
+  awardList: [...DEFAULT_AWARD_LIST],
+  events: [],
+  currentEventId: "",
+  legacyEventId: ""
 };
+
+let myRecords = [];
+let activeEventTab = null;
 
 let editingRecordId = null;
 let editingRecord = null;
 let loginInProgress = false;
 let submitInProgress = false;
+
+let wasLoggedIn = false;
+let userInitiatedLogout = false;
+let logoutTimer = null;
 
 
 /* =========================================================
@@ -611,6 +707,46 @@ function clearMessage() {
 
   messageBox.textContent = "";
   messageBox.className = "message";
+
+}
+
+
+/* =========================================================
+   EVENT HELPERS（場次）
+========================================================= */
+
+function getEvent(id) {
+
+  return settings.events.find(e => e.id === id) || null;
+
+}
+
+function getCurrentEvent() {
+
+  return getEvent(settings.currentEventId);
+
+}
+
+/*
+  舊資料沒有 eventId：
+  歸到 legacyEventId（第一個場次）。
+*/
+
+function resolveRecordEventId(record) {
+
+  if (record && record.eventId) {
+    return record.eventId;
+  }
+
+  if (settings.legacyEventId) {
+    return settings.legacyEventId;
+  }
+
+  if (settings.events.length) {
+    return settings.events[0].id;
+  }
+
+  return "";
 
 }
 
@@ -657,7 +793,19 @@ googleLoginBtn.addEventListener("click", async () => {
 
 logoutBtn.addEventListener("click", async () => {
 
-  await signOut(auth);
+  userInitiatedLogout = true;
+
+  try {
+
+    await signOut(auth);
+
+  } finally {
+
+    setTimeout(() => {
+      userInitiatedLogout = false;
+    }, 1500);
+
+  }
 
 });
 
@@ -666,20 +814,64 @@ logoutBtn.addEventListener("click", async () => {
    AUTH
 ========================================================= */
 
+function showLoggedOutUI() {
+
+  loginArea.style.display = "block";
+  userArea.style.display = "none";
+  formSection.style.display = "none";
+  recordsSection.style.display = "none";
+
+}
+
 onAuthStateChanged(auth, async user => {
 
   currentUser = user || null;
 
   if (!user) {
 
-    loginArea.style.display = "block";
-    userArea.style.display = "none";
-    formSection.style.display = "none";
-    recordsSection.style.display = "none";
+    /*
+      不是自己按登出，卻突然變成未登入：
+      先等 3 秒確認不是暫時狀態，
+      還是未登入才切回登入畫面並提示。
+    */
+
+    if (wasLoggedIn && !userInitiatedLogout) {
+
+      clearTimeout(logoutTimer);
+
+      logoutTimer = setTimeout(() => {
+
+        if (!auth.currentUser) {
+
+          wasLoggedIn = false;
+
+          showLoggedOutUI();
+
+          showMessage(
+            "登入狀態已中斷，請重新按「使用 Google 登入」。\n" +
+            "（若你同時開著管理員後台，請先關閉，或改用不同的瀏覽器／無痕視窗。）",
+            "info"
+          );
+
+        }
+
+      }, 3000);
+
+      return;
+
+    }
+
+    wasLoggedIn = false;
+
+    showLoggedOutUI();
 
     return;
 
   }
+
+  clearTimeout(logoutTimer);
+
+  wasLoggedIn = true;
 
   loginArea.style.display = "none";
   userArea.style.display = "block";
@@ -691,7 +883,11 @@ onAuthStateChanged(auth, async user => {
   try {
 
     await loadSettings();
+
     renderSettings();
+
+    refreshEventBanner();
+
     await loadMyRecords();
 
   } catch (error) {
@@ -731,6 +927,28 @@ async function loadSettings() {
         settings.awardList = data.awardList;
       }
 
+      settings.events = Array.isArray(data.events)
+        ? data.events
+            .filter(e => e && e.id)
+            .map(e => ({
+              id: String(e.id),
+              name: String(e.name || ""),
+              monthKey: String(e.monthKey || ""),
+              locked: !!e.locked,
+              createdAt: Number(e.createdAt) || 0
+            }))
+        : [];
+
+      settings.currentEventId =
+        typeof data.currentEventId === "string"
+          ? data.currentEventId
+          : "";
+
+      settings.legacyEventId =
+        typeof data.legacyEventId === "string"
+          ? data.legacyEventId
+          : "";
+
     }
 
   } catch (error) {
@@ -748,6 +966,8 @@ async function loadSettings() {
 
 function renderSettings() {
 
+  const keepPlatinum = platinumSelect.value;
+
   platinumSelect.innerHTML =
     '<option value="">請選擇上線白金</option>';
 
@@ -760,6 +980,15 @@ function renderSettings() {
     platinumSelect.appendChild(option);
 
   });
+
+  if (keepPlatinum) {
+    platinumSelect.value = keepPlatinum;
+  }
+
+  const keepAwards = new Set(
+    [...document.querySelectorAll('input[name="awards"]:checked')]
+      .map(input => input.value)
+  );
 
   awardGrid.innerHTML = "";
 
@@ -775,6 +1004,7 @@ function renderSettings() {
     input.name = "awards";
     input.id = id;
     input.value = award;
+    input.checked = keepAwards.has(award);
 
     const label = document.createElement("label");
     label.htmlFor = id;
@@ -791,39 +1021,90 @@ function renderSettings() {
 
 
 /* =========================================================
-   PHOTO PREVIEW
+   EVENT BANNER / FORM 可用狀態
 ========================================================= */
 
-photoInput.addEventListener("change", () => {
+function setFormEnabled(enabled) {
 
-  const file = photoInput.files?.[0];
+  form.querySelectorAll("input,select,button").forEach(el => {
 
-  if (!file) {
-    preview.style.display = "none";
-    return;
+    if (el === cancelEditBtn) {
+      return;
+    }
+
+    el.disabled = !enabled;
+
+  });
+
+}
+
+function refreshEventBanner() {
+
+  let text = "";
+  let cls = "ok";
+  let enabled = true;
+
+  if (editingRecordId && editingRecord) {
+
+    const ev = getEvent(resolveRecordEventId(editingRecord));
+
+    if (!ev) {
+
+      text = "找不到這筆資料所屬的場次，無法修改。";
+      cls = "warn";
+      enabled = false;
+
+    } else if (ev.locked) {
+
+      text = "「" + ev.name + "」已鎖定，無法修改。";
+      cls = "warn";
+      enabled = false;
+
+    } else {
+
+      text = "正在修改場次「" + ev.name + "」的資料。";
+
+    }
+
+  } else {
+
+    const cur = getCurrentEvent();
+
+    if (!cur) {
+
+      text = "目前沒有開放填寫的表揚場次，請等候管理員開放。";
+      cls = "warn";
+      enabled = false;
+
+    } else if (cur.locked) {
+
+      text = "目前場次「" + cur.name + "」已鎖定，暫時無法新增。請等候管理員開放新場次。";
+      cls = "warn";
+      enabled = false;
+
+    } else {
+
+      text = "目前填寫場次：" + cur.name;
+
+    }
+
   }
 
-  const reader = new FileReader();
+  eventBanner.textContent = text;
+  eventBanner.className = "event-banner " + cls;
 
-  reader.onload = event => {
-    previewImg.src = event.target.result;
-    preview.style.display = "block";
-  };
+  setFormEnabled(enabled);
 
-  reader.readAsDataURL(file);
-
-});
+}
 
 
 /* =========================================================
-   COMPRESS IMAGE
-   回傳：
-   - dataUrl      上傳到 Drive 的壓縮圖（最大邊 1600px）
-   - thumbDataUrl 列表顯示用的小縮圖（最大邊 THUMB_MAX px）
-   - fileName     檔名（副檔名改成 .jpg）
+   PHOTO：置中放大、裁切成直向 3:4
+   - dataUrl      上傳到 Drive（最大寬 960px，高 1280px）
+   - thumbDataUrl 列表縮圖（最大寬 180px，高 240px）
 ========================================================= */
 
-function compressImage(file) {
+function processImage(file) {
 
   return new Promise((resolve, reject) => {
 
@@ -835,49 +1116,59 @@ function compressImage(file) {
 
       img.onload = () => {
 
-        const MAX = 1600;
+        const W = img.naturalWidth || img.width;
+        const H = img.naturalHeight || img.height;
 
-        let width = img.width;
-        let height = img.height;
+        if (!W || !H) {
+          reject(new Error("圖片尺寸無法讀取"));
+          return;
+        }
 
-        if (width > MAX || height > MAX) {
+        const RATIO = 3 / 4;
 
-          if (width > height) {
-            height = Math.round(height * MAX / width);
-            width = MAX;
-          } else {
-            width = Math.round(width * MAX / height);
-            height = MAX;
-          }
+        let sx, sy, sw, sh;
+
+        if (W / H > RATIO) {
+
+          // 橫式或較寬的照片：左右裁掉
+          sh = H;
+          sw = H * RATIO;
+          sx = (W - sw) / 2;
+          sy = 0;
+
+        } else {
+
+          // 較窄的照片：上下裁掉
+          sw = W;
+          sh = W / RATIO;
+          sx = 0;
+          sy = (H - sh) / 2;
 
         }
 
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
+        function render(maxW, quality) {
 
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
+          const scale = Math.min(1, maxW / sw);
 
-        const dataUrl = canvas.toDataURL("image/jpeg", .84);
+          const dw = Math.max(1, Math.round(sw * scale));
+          const dh = Math.max(1, Math.round(dw * 4 / 3));
 
-        /* 列表用小縮圖 */
+          const canvas = document.createElement("canvas");
+          canvas.width = dw;
+          canvas.height = dh;
 
-        const scale = Math.min(1, THUMB_MAX / Math.max(img.width, img.height));
-        const tw = Math.max(1, Math.round(img.width * scale));
-        const th = Math.max(1, Math.round(img.height * scale));
+          const ctx = canvas.getContext("2d");
 
-        const thumbCanvas = document.createElement("canvas");
-        thumbCanvas.width = tw;
-        thumbCanvas.height = th;
+          ctx.imageSmoothingQuality = "high";
+          ctx.drawImage(img, sx, sy, sw, sh, 0, 0, dw, dh);
 
-        thumbCanvas.getContext("2d").drawImage(img, 0, 0, tw, th);
+          return canvas.toDataURL("image/jpeg", quality);
 
-        const thumbDataUrl = thumbCanvas.toDataURL("image/jpeg", .7);
+        }
 
         resolve({
-          dataUrl: dataUrl,
-          thumbDataUrl: thumbDataUrl,
+          dataUrl: render(UPLOAD_MAX_W, .88),
+          thumbDataUrl: render(THUMB_MAX_W, .7),
           fileName: file.name.replace(/\.[^/.]+$/, "") + ".jpg"
         });
 
@@ -896,6 +1187,32 @@ function compressImage(file) {
   });
 
 }
+
+photoInput.addEventListener("change", async () => {
+
+  const file = photoInput.files?.[0];
+
+  if (!file) {
+    preview.style.display = "none";
+    return;
+  }
+
+  try {
+
+    const processed = await processImage(file);
+
+    previewImg.src = processed.dataUrl;
+    preview.style.display = "block";
+
+  } catch (error) {
+
+    console.warn("preview failed", error);
+
+    preview.style.display = "none";
+
+  }
+
+});
 
 
 /* =========================================================
@@ -963,8 +1280,48 @@ form.addEventListener("submit", async event => {
   let recordId = editingRecordId;
   let newPhotoId = null;
   let oldPhotoId = editingRecord?.photoFileId || "";
+  let targetEventId = "";
 
   try {
+
+    /*
+      =====================================================
+      STEP 0
+      重新讀取場次設定，確認場次沒有被鎖定 / 切換
+      =====================================================
+    */
+
+    await loadSettings();
+
+    if (editingRecordId) {
+
+      targetEventId = resolveRecordEventId(editingRecord);
+
+      const ev = getEvent(targetEventId);
+
+      if (!ev) {
+        throw new Error("找不到這筆資料所屬的場次，無法修改。");
+      }
+
+      if (ev.locked) {
+        throw new Error("「" + ev.name + "」已被鎖定，無法修改。");
+      }
+
+    } else {
+
+      const cur = getCurrentEvent();
+
+      if (!cur) {
+        throw new Error("目前沒有開放填寫的表揚場次。");
+      }
+
+      if (cur.locked) {
+        throw new Error("目前場次「" + cur.name + "」已被鎖定，無法新增。");
+      }
+
+      targetEventId = cur.id;
+
+    }
 
     /*
       =====================================================
@@ -984,6 +1341,7 @@ form.addEventListener("submit", async event => {
       await setDoc(newRef, {
         uid: currentUser.uid,
         email: currentUser.email || "",
+        eventId: targetEventId,
         name: name,
         occupation: occupation,
         platinum: platinum,
@@ -1003,6 +1361,7 @@ form.addEventListener("submit", async event => {
       await updateDoc(recordRef, {
         uid: currentUser.uid,
         email: currentUser.email || "",
+        eventId: targetEventId,
         name: name,
         occupation: occupation,
         platinum: platinum,
@@ -1023,14 +1382,14 @@ form.addEventListener("submit", async event => {
 
       showMessage("② 表揚資料已建立，正在上傳照片……", "info");
 
-      const compressed = await compressImage(selectedPhoto);
+      const processed = await processImage(selectedPhoto);
 
       const photoInfo = await postToAppsScript({
         action: "uploadPhoto",
         idToken: await currentUser.getIdToken(true),
-        fileName: compressed.fileName,
+        fileName: processed.fileName,
         mimeType: "image/jpeg",
-        base64: compressed.dataUrl
+        base64: processed.dataUrl
       });
 
       if (!photoInfo || !photoInfo.fileId) {
@@ -1054,7 +1413,7 @@ form.addEventListener("submit", async event => {
         photoFileId: photoInfo.fileId,
         photoFileName: photoInfo.fileName || "",
         photoDriveUrl: photoInfo.driveUrl || photoInfo.fileUrl || "",
-        photoThumb: compressed.thumbDataUrl || "",
+        photoThumb: processed.thumbDataUrl || "",
         updatedAt: serverTimestamp()
       });
 
@@ -1092,12 +1451,16 @@ form.addEventListener("submit", async event => {
       =====================================================
     */
 
+    const wasEditing = !!editingRecordId;
+
     showMessage(
-      editingRecordId
+      wasEditing
         ? "✅ 表揚資料修改成功！"
         : "✅ 表揚資料提交成功！",
       "success"
     );
+
+    activeEventTab = targetEventId;
 
     resetForm();
 
@@ -1148,11 +1511,15 @@ form.addEventListener("submit", async event => {
       "error"
     );
 
+    refreshEventBanner();
+
   } finally {
 
     submitInProgress = false;
     submitBtn.disabled = false;
     cancelEditBtn.disabled = false;
+
+    refreshEventBanner();
 
   }
 
@@ -1167,6 +1534,7 @@ async function loadMyRecords() {
 
   recordsLoading.style.display = "block";
   recordsList.innerHTML = "";
+  eventTabs.innerHTML = "";
 
   try {
 
@@ -1197,25 +1565,11 @@ async function loadMyRecords() {
 
     });
 
+    myRecords = records;
+
     recordsLoading.style.display = "none";
 
-    if (!records.length) {
-
-      recordsList.innerHTML = `
-        <div class="empty">
-          目前還沒有表揚資料。
-        </div>
-      `;
-
-      return;
-
-    }
-
-    records.forEach(record => {
-
-      recordsList.appendChild(createRecordElement(record));
-
-    });
+    renderRecordsView();
 
   } catch (error) {
 
@@ -1237,10 +1591,144 @@ async function loadMyRecords() {
 
 
 /* =========================================================
+   RECORDS VIEW（依場次分頁）
+========================================================= */
+
+function renderRecordsView() {
+
+  /* 依場次分組 */
+
+  const groups = new Map();
+
+  myRecords.forEach(record => {
+
+    const eid = resolveRecordEventId(record);
+
+    if (!groups.has(eid)) {
+      groups.set(eid, []);
+    }
+
+    groups.get(eid).push(record);
+
+  });
+
+  /* 分頁：新的場次在前面；只顯示「有我的資料」或「進行中」的場次 */
+
+  const tabs = [];
+
+  [...settings.events]
+    .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+    .forEach(ev => {
+
+      const has = groups.has(ev.id);
+      const isCurrent = ev.id === settings.currentEventId;
+
+      if (has || isCurrent) {
+
+        tabs.push({
+          id: ev.id,
+          name: ev.name,
+          locked: !!ev.locked,
+          current: isCurrent,
+          count: (groups.get(ev.id) || []).length
+        });
+
+      }
+
+    });
+
+  if (groups.has("")) {
+
+    tabs.push({
+      id: "",
+      name: "未分場次",
+      locked: true,
+      current: false,
+      count: groups.get("").length
+    });
+
+  }
+
+  eventTabs.innerHTML = "";
+  recordsList.innerHTML = "";
+
+  if (!tabs.length) {
+
+    recordsList.innerHTML = `
+      <div class="empty">
+        目前還沒有表揚資料。
+      </div>
+    `;
+
+    return;
+
+  }
+
+  if (!tabs.some(t => t.id === activeEventTab)) {
+
+    const curTab = tabs.find(t => t.current);
+
+    activeEventTab = curTab ? curTab.id : tabs[0].id;
+
+  }
+
+  tabs.forEach(tab => {
+
+    const btn = document.createElement("button");
+
+    btn.type = "button";
+
+    btn.className =
+      "event-tab" +
+      (tab.id === activeEventTab ? " active" : "");
+
+    btn.textContent =
+      tab.name +
+      (tab.locked ? " 🔒" : "") +
+      (tab.current ? "（進行中）" : "") +
+      "（" + tab.count + "）";
+
+    btn.onclick = () => {
+      activeEventTab = tab.id;
+      renderRecordsView();
+    };
+
+    eventTabs.appendChild(btn);
+
+  });
+
+  const activeTab = tabs.find(t => t.id === activeEventTab);
+
+  const activeRecords = groups.get(activeEventTab) || [];
+
+  if (!activeRecords.length) {
+
+    recordsList.innerHTML = `
+      <div class="empty">
+        這個場次目前還沒有你的表揚資料。
+      </div>
+    `;
+
+    return;
+
+  }
+
+  activeRecords.forEach(record => {
+
+    recordsList.appendChild(
+      createRecordElement(record, !!(activeTab && activeTab.locked))
+    );
+
+  });
+
+}
+
+
+/* =========================================================
    RECORD
 ========================================================= */
 
-function createRecordElement(record) {
+function createRecordElement(record, locked) {
 
   const wrapper = document.createElement("div");
   wrapper.className = "record";
@@ -1315,6 +1803,20 @@ function createRecordElement(record) {
   main.appendChild(img);
   main.appendChild(content);
 
+  wrapper.appendChild(main);
+
+  if (locked) {
+
+    const note = document.createElement("div");
+    note.className = "record-locked";
+    note.textContent = "🔒 此場次已鎖定，無法修改或刪除。";
+
+    wrapper.appendChild(note);
+
+    return wrapper;
+
+  }
+
   const actions = document.createElement("div");
   actions.className = "record-actions";
 
@@ -1337,7 +1839,6 @@ function createRecordElement(record) {
   actions.appendChild(editBtn);
   actions.appendChild(deleteBtn);
 
-  wrapper.appendChild(main);
   wrapper.appendChild(actions);
 
   return wrapper;
@@ -1350,6 +1851,19 @@ function createRecordElement(record) {
 ========================================================= */
 
 function startEdit(record) {
+
+  const ev = getEvent(resolveRecordEventId(record));
+
+  if (!ev || ev.locked) {
+
+    showMessage(
+      "這個場次已鎖定，無法修改。",
+      "error"
+    );
+
+    return;
+
+  }
 
   editingRecordId = record.id;
   editingRecord = record;
@@ -1382,6 +1896,8 @@ function startEdit(record) {
   submitBtn.textContent = "儲存修改";
 
   cancelEditBtn.style.display = "inline-block";
+
+  refreshEventBanner();
 
   formSection.scrollIntoView({
     behavior: "smooth"
@@ -1423,6 +1939,8 @@ function resetForm() {
 
   preview.style.display = "none";
 
+  refreshEventBanner();
+
 }
 
 
@@ -1434,6 +1952,25 @@ async function deleteRecord(record) {
 
   if (!currentUser) {
     return;
+  }
+
+  /* 重新讀取場次，確認沒有被鎖定 */
+
+  await loadSettings();
+
+  const ev = getEvent(resolveRecordEventId(record));
+
+  if (!ev || ev.locked) {
+
+    showMessage(
+      "這個場次已鎖定，無法刪除。",
+      "error"
+    );
+
+    await loadMyRecords();
+
+    return;
+
   }
 
   if (!confirm("確定要刪除「" + record.name + "」嗎？")) {
