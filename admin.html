@@ -202,6 +202,81 @@ td { border-bottom: 1px solid #292929; padding: 10px; font-size: 12px; vertical-
 
 .login-error { margin-top: 15px; }
 
+/* 編輯彈窗 */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 999;
+}
+
+.modal-box {
+    background: #151515;
+    border: 1px solid #333;
+    border-radius: 16px;
+    padding: 22px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 88vh;
+    overflow-y: auto;
+}
+
+.modal-title { color: #d4af37; font-size: 18px; font-weight: 700; margin-bottom: 15px; }
+
+.modal-box input, .modal-box select { margin-bottom: 12px; }
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 18px;
+}
+
+.awards-check-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.award-check-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: #101010;
+    border: 1px solid #333;
+    border-radius: 20px;
+    padding: 6px 10px;
+    font-size: 12px;
+    color: #ccc;
+    cursor: pointer;
+}
+
+.award-check-item input { width: auto; margin: 0; }
+
+.edit-photo-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.edit-photo-row img {
+    width: 60px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background: #0d0d0d;
+}
+
+.edit-photo-row input[type=file] { flex: 1; margin-bottom: 0; }
+
 @media(max-width:700px) {
     .stats { grid-template-columns: 1fr; }
     .user-bar { flex-direction: column; align-items: stretch; }
@@ -427,6 +502,11 @@ td { border-bottom: 1px solid #292929; padding: 10px; font-size: 12px; vertical-
 
         <div class="card-title">表揚資料</div>
 
+        <div class="hint">
+            點擊「編輯」可以修改任何一筆資料的姓名、職業、上線白金、突破獎銜，
+            以及更換新照片。
+        </div>
+
         <div class="table-wrap">
 
             <table>
@@ -453,6 +533,49 @@ td { border-bottom: 1px solid #292929; padding: 10px; font-size: 12px; vertical-
     </div>
 
 </div>
+
+</div>
+
+
+<!-- 編輯資料彈窗 -->
+
+<div id="editModal" class="modal-overlay hidden">
+
+    <div class="modal-box">
+
+        <div class="modal-title">編輯表揚資料</div>
+
+        <div id="editStatus" class="status"></div>
+
+        <div class="card-sub" style="margin-top:0;">姓名</div>
+        <input id="editName" placeholder="姓名">
+
+        <div class="card-sub">職業</div>
+        <input id="editOccupation" placeholder="職業">
+
+        <div class="card-sub">上線白金</div>
+        <select id="editPlatinum"></select>
+
+        <div class="card-sub">突破獎銜（可複選）</div>
+        <div id="editAwardsList" class="awards-check-list"></div>
+
+        <div class="card-sub">照片</div>
+
+        <div class="edit-photo-row">
+            <img id="editPhotoPreview" src="" alt="目前照片">
+            <input id="editPhotoFile" type="file" accept="image/*">
+        </div>
+
+        <div class="hint" style="margin-bottom:0;">
+            不選擇新照片，會保留原本的照片。
+        </div>
+
+        <div class="modal-actions">
+            <button id="editCancelBtn" class="btn-dark">取消</button>
+            <button id="editSaveBtn" class="btn-gold">儲存變更</button>
+        </div>
+
+    </div>
 
 </div>
 
@@ -549,6 +672,12 @@ let settings = {
 let viewEventId = "";
 
 let loginInProgress = false;
+
+/* 編輯彈窗狀態 */
+
+let editingRecordId = null;
+
+let editingNewPhotoFile = null;
 
 
 /* ============================================================
@@ -1645,6 +1774,8 @@ function renderRecords() {
 
                 <td>
                     <div class="actions">
+                        <button class="btn-blue"
+                            onclick="window.adminEdit('${record.id}')">編輯</button>
                         <button class="btn-danger"
                             onclick="window.adminDelete('${record.id}')">刪除</button>
                     </div>
@@ -1712,6 +1843,290 @@ window.adminDelete = async function (id) {
     }
 
 };
+
+
+/* ============================================================
+   Admin Edit（編輯彈窗）
+============================================================ */
+
+function renderEditPlatinumOptions(currentValue) {
+
+    const list = [...settings.platinumList];
+
+    if (currentValue && !list.includes(currentValue)) {
+        list.push(currentValue);
+    }
+
+    $("editPlatinum").innerHTML = list
+        .map(p => `
+            <option value="${escapeHtml(p)}" ${p === currentValue ? "selected" : ""}>
+                ${escapeHtml(p)}
+            </option>
+        `).join("");
+
+}
+
+function renderEditAwardsCheckboxes(currentAwards) {
+
+    const list = [...settings.awardList];
+
+    currentAwards.forEach(a => {
+        if (!list.includes(a)) {
+            list.push(a);
+        }
+    });
+
+    $("editAwardsList").innerHTML = list
+        .map((a, index) => {
+
+            const inputId = "editAward_" + index;
+            const checked = currentAwards.includes(a) ? "checked" : "";
+
+            return `
+                <label class="award-check-item" for="${inputId}">
+                    <input type="checkbox" id="${inputId}" value="${escapeHtml(a)}" ${checked}>
+                    ${escapeHtml(a)}
+                </label>
+            `;
+
+        }).join("");
+
+}
+
+function currentPhotoPreviewUrl(record) {
+
+    if (record.photoThumb) {
+        return record.photoThumb;
+    }
+
+    if (record.photoFileId) {
+        return "https://drive.google.com/thumbnail?id=" +
+            encodeURIComponent(record.photoFileId) + "&sz=w400";
+    }
+
+    return "";
+
+}
+
+window.adminEdit = function (id) {
+
+    const record = records.find(r => r.id === id);
+
+    if (!record) {
+        return;
+    }
+
+    editingRecordId = id;
+
+    editingNewPhotoFile = null;
+
+    $("editStatus").className = "status";
+
+    $("editStatus").textContent = "";
+
+    $("editName").value = record.name || "";
+
+    $("editOccupation").value = record.occupation || "";
+
+    renderEditPlatinumOptions(record.platinum || "");
+
+    renderEditAwardsCheckboxes(
+        Array.isArray(record.awards) ? record.awards : []
+    );
+
+    $("editPhotoPreview").src = currentPhotoPreviewUrl(record);
+
+    $("editPhotoFile").value = "";
+
+    $("editModal").classList.remove("hidden");
+
+};
+
+function closeEditModal() {
+
+    $("editModal").classList.add("hidden");
+
+    editingRecordId = null;
+
+    editingNewPhotoFile = null;
+
+}
+
+$("editCancelBtn").addEventListener("click", closeEditModal);
+
+$("editPhotoFile").addEventListener("change", () => {
+
+    const file = $("editPhotoFile").files[0];
+
+    if (!file) {
+        editingNewPhotoFile = null;
+        return;
+    }
+
+    editingNewPhotoFile = file;
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+        $("editPhotoPreview").src = reader.result;
+    };
+
+    reader.readAsDataURL(file);
+
+});
+
+function fileToBase64(file) {
+
+    return new Promise((resolve, reject) => {
+
+        const reader = new FileReader();
+
+        reader.onload = () => {
+
+            const result = String(reader.result || "");
+
+            const commaIndex = result.indexOf(",");
+
+            resolve(commaIndex !== -1 ? result.slice(commaIndex + 1) : result);
+
+        };
+
+        reader.onerror = () => reject(new Error("讀取照片檔案失敗。"));
+
+        reader.readAsDataURL(file);
+
+    });
+
+}
+
+$("editSaveBtn").addEventListener("click", async () => {
+
+    if (!editingRecordId) {
+        return;
+    }
+
+    const record = records.find(r => r.id === editingRecordId);
+
+    if (!record) {
+        return;
+    }
+
+    const name = $("editName").value.trim();
+
+    const occupation = $("editOccupation").value.trim();
+
+    const platinum = $("editPlatinum").value;
+
+    const awards = Array.from(
+        document.querySelectorAll("#editAwardsList input[type=checkbox]:checked")
+    ).map(cb => cb.value);
+
+    if (!name) {
+        alert("姓名不能空白。");
+        return;
+    }
+
+    const btn = $("editSaveBtn");
+
+    const statusEl = $("editStatus");
+
+    btn.disabled = true;
+
+    btn.textContent = "儲存中...";
+
+    statusEl.className = "status info";
+
+    statusEl.textContent = "正在儲存...";
+
+    try {
+
+        const updateData = {
+            name: name,
+            occupation: occupation,
+            platinum: platinum,
+            awards: awards
+        };
+
+        if (editingNewPhotoFile) {
+
+            statusEl.textContent = "正在上傳新照片...";
+
+            const token = await currentUser.getIdToken(true);
+
+            const base64 = await fileToBase64(editingNewPhotoFile);
+
+            const uploadResult = await postToAppsScript({
+                action: "uploadPhoto",
+                idToken: token,
+                photoBase64: base64,
+                fileName: name || record.name || "photo",
+                mimeType: editingNewPhotoFile.type || "image/jpeg",
+                responseMode: "json"
+            });
+
+            updateData.photoFileId =
+                uploadResult.fileId || uploadResult.photoFileId || "";
+
+            updateData.photoFileName = uploadResult.fileName || "";
+
+            updateData.photoDriveUrl =
+                uploadResult.fileUrl || uploadResult.url || "";
+
+            updateData.photoThumb = uploadResult.thumbnailUrl || "";
+
+            const oldFileId = record.photoFileId;
+
+            if (oldFileId && oldFileId !== updateData.photoFileId) {
+
+                try {
+
+                    await postToAppsScript({
+                        action: "deletePhoto",
+                        idToken: token,
+                        fileId: oldFileId
+                    });
+
+                } catch (error) {
+
+                    console.warn("舊照片刪除失敗（不影響本次修改）", error);
+
+                }
+
+            }
+
+        }
+
+        statusEl.textContent = "正在更新資料...";
+
+        await setDoc(
+            doc(db, "recognitions", editingRecordId),
+            updateData,
+            { merge: true }
+        );
+
+        await loadRecords();
+
+        closeEditModal();
+
+        showStatus("資料已更新。", "success");
+
+    } catch (error) {
+
+        console.error(error);
+
+        statusEl.className = "status error";
+
+        statusEl.textContent = "儲存失敗：" + (error.message || "未知錯誤");
+
+    } finally {
+
+        btn.disabled = false;
+
+        btn.textContent = "儲存變更";
+
+    }
+
+});
 
 
 /* ============================================================
