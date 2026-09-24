@@ -862,4 +862,1336 @@ async function ensureSettings() {
 
     const ref = doc(db, "settings", "config");
 
-    const
+    const snap = await getDoc(ref);
+
+    const data = snap.exists() ? snap.data() : {};
+
+    const patch = {};
+
+    if (!Array.isArray(data.platinumList)) {
+        patch.platinumList = DEFAULT_PLATINUMS;
+    }
+
+    if (!Array.isArray(data.awardList)) {
+        patch.awardList = DEFAULT_AWARDS;
+    }
+
+    if (!Array.isArray(data.events) || !data.events.length) {
+
+        const mk = monthKeyNow();
+
+        const id = newEventId();
+
+        patch.events = [{
+            id: id,
+            name: defaultEventName(mk),
+            monthKey: mk,
+            locked: false,
+            createdAt: Date.now()
+        }];
+
+        patch.currentEventId = id;
+
+        patch.legacyEventId = id;
+
+    }
+
+    if (Object.keys(patch).length) {
+
+        await setDoc(ref, patch, { merge: true });
+
+    }
+
+}
+
+
+/* ============================================================
+   載入 Settings
+============================================================ */
+
+async function loadSettings() {
+
+    const snap = await getDoc(doc(db, "settings", "config"));
+
+    if (snap.exists()) {
+
+        const data = snap.data();
+
+        settings = {
+
+            platinumList: Array.isArray(data.platinumList)
+                ? data.platinumList
+                : DEFAULT_PLATINUMS,
+
+            awardList: Array.isArray(data.awardList)
+                ? data.awardList
+                : DEFAULT_AWARDS,
+
+            events: Array.isArray(data.events)
+                ? data.events
+                    .filter(e => e && e.id)
+                    .map(e => ({
+                        id: String(e.id),
+                        name: String(e.name || ""),
+                        monthKey: String(e.monthKey || ""),
+                        locked: !!e.locked,
+                        createdAt: Number(e.createdAt) || 0
+                    }))
+                : [],
+
+            currentEventId: typeof data.currentEventId === "string"
+                ? data.currentEventId
+                : "",
+
+            legacyEventId: typeof data.legacyEventId === "string"
+                ? data.legacyEventId
+                : ""
+
+        };
+
+    }
+
+    renderSettings();
+
+    refreshEventUI();
+
+}
+
+
+/* ============================================================
+   Render Settings
+============================================================ */
+
+function renderSettings() {
+
+    platinumSettings.innerHTML = settings.platinumList
+        .map((item, index) => `
+
+            <div class="setting-item">
+
+                <input
+                    value="${escapeHtml(item)}"
+                    data-type="platinum"
+                    data-index="${index}">
+
+                <button class="btn-dark"
+                    onclick="window.moveSetting('platinum',${index},-1)">↑</button>
+
+                <button class="btn-dark"
+                    onclick="window.moveSetting('platinum',${index},1)">↓</button>
+
+                <button class="btn-danger"
+                    onclick="window.deleteSetting('platinum',${index})">刪除</button>
+
+            </div>
+
+        `).join("");
+
+    awardSettings.innerHTML = settings.awardList
+        .map((item, index) => `
+
+            <div class="setting-item">
+
+                <input
+                    value="${escapeHtml(item)}"
+                    data-type="award"
+                    data-index="${index}">
+
+                <button class="btn-dark"
+                    onclick="window.moveSetting('award',${index},-1)">↑</button>
+
+                <button class="btn-dark"
+                    onclick="window.moveSetting('award',${index},1)">↓</button>
+
+                <button class="btn-danger"
+                    onclick="window.deleteSetting('award',${index})">刪除</button>
+
+            </div>
+
+        `).join("");
+
+}
+
+
+/* ============================================================
+   取得畫面上修改後的文字
+============================================================ */
+
+function readSettingInputs() {
+
+    document
+        .querySelectorAll(".setting-item input")
+        .forEach(input => {
+
+            const type = input.dataset.type;
+
+            if (type !== "platinum" && type !== "award") {
+                return;
+            }
+
+            const index = Number(input.dataset.index);
+
+            const value = input.value.trim();
+
+            if (!value) {
+                return;
+            }
+
+            if (type === "platinum") {
+                settings.platinumList[index] = value;
+            } else {
+                settings.awardList[index] = value;
+            }
+
+        });
+
+}
+
+
+/* ============================================================
+   儲存 Settings（白金 / 獎銜）
+   使用 merge，不會覆蓋場次資料
+============================================================ */
+
+async function saveSettings() {
+
+    readSettingInputs();
+
+    await setDoc(
+        doc(db, "settings", "config"),
+        {
+            platinumList: settings.platinumList,
+            awardList: settings.awardList
+        },
+        { merge: true }
+    );
+
+    renderSettings();
+
+    showStatus("設定已儲存。", "success");
+
+}
+
+
+/* ============================================================
+   移動
+============================================================ */
+
+window.moveSetting = async function (type, index, direction) {
+
+    readSettingInputs();
+
+    const list = type === "platinum"
+        ? settings.platinumList
+        : settings.awardList;
+
+    const newIndex = index + direction;
+
+    if (newIndex < 0 || newIndex >= list.length) {
+        return;
+    }
+
+    [list[index], list[newIndex]] = [list[newIndex], list[index]];
+
+    await saveSettings();
+
+};
+
+
+/* ============================================================
+   Delete Setting
+============================================================ */
+
+window.deleteSetting = async function (type, index) {
+
+    readSettingInputs();
+
+    const list = type === "platinum"
+        ? settings.platinumList
+        : settings.awardList;
+
+    const name = list[index];
+
+    if (!confirm(`確定刪除「${name}」嗎？`)) {
+        return;
+    }
+
+    list.splice(index, 1);
+
+    await saveSettings();
+
+};
+
+
+/* ============================================================
+   Add Platinum
+============================================================ */
+
+$("addPlatinumBtn").addEventListener("click", async () => {
+
+    const input = $("newPlatinum");
+
+    const value = input.value.trim();
+
+    if (!value) {
+        return;
+    }
+
+    readSettingInputs();
+
+    if (settings.platinumList.includes(value)) {
+        alert("這個上線白金已經存在。");
+        return;
+    }
+
+    settings.platinumList.push(value);
+
+    input.value = "";
+
+    await saveSettings();
+
+});
+
+
+/* ============================================================
+   Add Award
+============================================================ */
+
+$("addAwardBtn").addEventListener("click", async () => {
+
+    const input = $("newAward");
+
+    const value = input.value.trim();
+
+    if (!value) {
+        return;
+    }
+
+    readSettingInputs();
+
+    if (settings.awardList.includes(value)) {
+        alert("這個突破獎銜已經存在。");
+        return;
+    }
+
+    settings.awardList.push(value);
+
+    input.value = "";
+
+    await saveSettings();
+
+});
+
+
+/* ============================================================
+   場次：畫面
+============================================================ */
+
+function refreshEventUI() {
+
+    if (viewEventId !== ALL && !getEvent(viewEventId)) {
+
+        viewEventId = getEvent(settings.currentEventId)
+            ? settings.currentEventId
+            : ALL;
+
+    }
+
+    renderEvents();
+
+    renderViewSelect();
+
+    renderRecords();
+
+    renderPptTarget();
+
+}
+
+function renderEvents() {
+
+    const counts = countByEvent();
+
+    const list = sortedEvents();
+
+    if (!list.length) {
+
+        eventList.innerHTML = '<div class="hint">尚無場次。</div>';
+
+        return;
+
+    }
+
+    eventList.innerHTML = list.map(ev => {
+
+        const isCur = ev.id === settings.currentEventId;
+
+        let badges = "";
+
+        if (isCur && !ev.locked) {
+
+            badges =
+                '<span class="badge current">進行中</span>' +
+                '<span class="badge open">開放填寫</span>';
+
+        } else if (isCur && ev.locked) {
+
+            badges =
+                '<span class="badge current">進行中</span>' +
+                '<span class="badge locked">🔒 已鎖定（填寫者無法填寫）</span>';
+
+        } else if (ev.locked) {
+
+            badges = '<span class="badge locked">🔒 已鎖定</span>';
+
+        } else {
+
+            badges = '<span class="badge">未鎖定（填寫者仍可修改自己的資料）</span>';
+
+        }
+
+        const id = escapeHtml(ev.id);
+
+        return `
+
+            <div class="event-item ${isCur ? "current" : ""}">
+
+                <input
+                    class="ev-name"
+                    id="evname_${id}"
+                    value="${escapeHtml(ev.name)}">
+
+                <button class="btn-dark"
+                    onclick="window.saveEventName('${id}')">儲存名稱</button>
+
+                <button class="${ev.locked ? "btn-blue" : "btn-danger"}"
+                    onclick="window.toggleEventLock('${id}')">
+                    ${ev.locked ? "解除鎖定" : "鎖定此場次"}
+                </button>
+
+                ${isCur ? "" : `
+                <button class="btn-gold"
+                    onclick="window.setCurrentEvent('${id}')">設為進行中</button>`}
+
+                <div class="ev-meta">
+                    ${badges}
+                    <span>月份：${escapeHtml(ev.monthKey || "-")}</span>
+                    <span>｜ ${counts[ev.id] || 0} 位表揚者</span>
+                </div>
+
+            </div>
+
+        `;
+
+    }).join("");
+
+}
+
+function renderViewSelect() {
+
+    const counts = countByEvent();
+
+    let html =
+        `<option value="${ALL}">全部場次（${records.length} 位）</option>`;
+
+    html += sortedEvents().map(ev =>
+        `<option value="${escapeHtml(ev.id)}">` +
+        escapeHtml(ev.name) +
+        (ev.id === settings.currentEventId ? "（進行中）" : "") +
+        (ev.locked ? " 🔒" : "") +
+        `（${counts[ev.id] || 0} 位）</option>`
+    ).join("");
+
+    viewEventSelect.innerHTML = html;
+
+    viewEventSelect.value = viewEventId;
+
+}
+
+viewEventSelect.addEventListener("change", () => {
+
+    viewEventId = viewEventSelect.value;
+
+    renderRecords();
+
+    renderPptTarget();
+
+});
+
+function renderPptTarget() {
+
+    const ev = viewEventId === ALL ? null : getEvent(viewEventId);
+
+    if (!ev) {
+
+        pptTarget.innerHTML =
+            '<span style="color:#ff9d9d;">請先在上方「檢視場次」選擇一個場次' +
+            '（不能選「全部場次」），才能生成 PPT。</span>';
+
+        return;
+
+    }
+
+    const n = records.filter(r => eventIdOfRecord(r) === ev.id).length;
+
+    pptTarget.innerHTML =
+        `本次將匯出：<strong style="color:#d4af37;">${escapeHtml(ev.name)}</strong>` +
+        `（${n} 位表揚者）。<br>只會匯出這個場次的資料，不含其他場次。`;
+
+}
+
+
+/* ============================================================
+   場次：操作
+============================================================ */
+
+async function saveEventsConfig(successMessage) {
+
+    try {
+
+        await setDoc(
+            doc(db, "settings", "config"),
+            {
+                events: settings.events,
+                currentEventId: settings.currentEventId,
+                legacyEventId: settings.legacyEventId
+            },
+            { merge: true }
+        );
+
+        refreshEventUI();
+
+        showStatus(successMessage, "success");
+
+    } catch (error) {
+
+        console.error(error);
+
+        showStatus("儲存場次失敗：" + error.message, "error");
+
+        try {
+            await loadSettings();
+        } catch (e) {}
+
+    }
+
+}
+
+/* 新增新場次 */
+
+$("addEventBtn").addEventListener("click", async () => {
+
+    const monthKey = $("newEventMonth").value;
+
+    if (!/^\d{4}-\d{2}$/.test(monthKey)) {
+        alert("請先選擇這場表揚的月份。");
+        return;
+    }
+
+    const name = $("newEventName").value.trim() || defaultEventName(monthKey);
+
+    if (settings.events.some(e => e.name === name)) {
+        alert("已經有相同名稱的場次，請改用不同的名稱。");
+        return;
+    }
+
+    const cur = getEvent(settings.currentEventId);
+
+    const lockPrev = $("lockPrevOnNew").checked && cur && !cur.locked;
+
+    const ok = confirm(
+        `確定開啟新場次「${name}」嗎？\n\n` +
+        "• 新場次一開始沒有任何資料。\n" +
+        "• 填寫者之後新增的資料，會歸在這個新場次。\n" +
+        "• 舊場次的資料都會保留。\n" +
+        (lockPrev
+            ? `• 目前進行中的「${cur.name}」會同時被鎖定。`
+            : "• 舊場次不會被鎖定。")
+    );
+
+    if (!ok) {
+        return;
+    }
+
+    const id = newEventId();
+
+    if (lockPrev) {
+        cur.locked = true;
+    }
+
+    settings.events.push({
+        id: id,
+        name: name,
+        monthKey: monthKey,
+        locked: false,
+        createdAt: Date.now()
+    });
+
+    settings.currentEventId = id;
+
+    viewEventId = id;
+
+    $("newEventName").value = "";
+
+    await saveEventsConfig(`已開啟新場次「${name}」。`);
+
+});
+
+/* 鎖定 / 解除鎖定 */
+
+window.toggleEventLock = async function (id) {
+
+    const ev = getEvent(id);
+
+    if (!ev) {
+        return;
+    }
+
+    const willLock = !ev.locked;
+
+    const msg = willLock
+        ? `確定鎖定「${ev.name}」嗎？\n\n鎖定後，填寫者無法再新增、修改或刪除這個場次的資料。` +
+          (id === settings.currentEventId
+              ? "\n\n注意：這是目前進行中的場次，鎖定後填寫者將無法新增資料。"
+              : "")
+        : `確定解除「${ev.name}」的鎖定嗎？\n\n解除後，填寫者可以修改自己在這個場次的資料。`;
+
+    if (!confirm(msg)) {
+        return;
+    }
+
+    ev.locked = willLock;
+
+    await saveEventsConfig(
+        willLock ? `已鎖定「${ev.name}」。` : `已解除「${ev.name}」的鎖定。`
+    );
+
+};
+
+/* 設為進行中 */
+
+window.setCurrentEvent = async function (id) {
+
+    const ev = getEvent(id);
+
+    if (!ev) {
+        return;
+    }
+
+    let msg =
+        `確定把「${ev.name}」設為進行中的場次嗎？\n\n` +
+        "填寫者之後新增的資料，會歸在這個場次。";
+
+    if (ev.locked) {
+        msg += "\n\n這個場次目前已鎖定，設為進行中時會一併解除鎖定。";
+    }
+
+    if (!confirm(msg)) {
+        return;
+    }
+
+    ev.locked = false;
+
+    settings.currentEventId = id;
+
+    viewEventId = id;
+
+    await saveEventsConfig(`「${ev.name}」已設為進行中。`);
+
+};
+
+/* 改名 */
+
+window.saveEventName = async function (id) {
+
+    const ev = getEvent(id);
+
+    if (!ev) {
+        return;
+    }
+
+    const input = $("evname_" + id);
+
+    const value = input ? input.value.trim() : "";
+
+    if (!value) {
+        alert("場次名稱不能空白。");
+        return;
+    }
+
+    if (settings.events.some(e => e.id !== id && e.name === value)) {
+        alert("已經有相同名稱的場次。");
+        return;
+    }
+
+    ev.name = value;
+
+    await saveEventsConfig("場次名稱已儲存。");
+
+};
+
+/* 新增場次的月份，預設當月 */
+
+$("newEventMonth").value = monthKeyNow();
+
+
+/* ============================================================
+   Load Records
+============================================================ */
+
+async function loadRecords() {
+
+    const snapshot = await getDocs(collection(db, "recognitions"));
+
+    records = snapshot.docs.map(d => ({
+        id: d.id,
+        ...d.data()
+    }));
+
+    records.sort((a, b) => {
+
+        const at = a.createdAt?.seconds || 0;
+
+        const bt = b.createdAt?.seconds || 0;
+
+        return bt - at;
+
+    });
+
+    refreshEventUI();
+
+}
+
+
+/* ============================================================
+   Render Records（依「檢視場次」）
+============================================================ */
+
+function renderRecords() {
+
+    const list = viewRecords();
+
+    $("totalCount").textContent = list.length;
+
+    const platinumSet = new Set(
+        list.map(r => r.platinum).filter(Boolean)
+    );
+
+    const awardSet = new Set(
+        list.flatMap(r => Array.isArray(r.awards) ? r.awards : [])
+    );
+
+    $("platinumCount").textContent = platinumSet.size;
+
+    $("awardCount").textContent = awardSet.size;
+
+    if (!list.length) {
+
+        recordsBody.innerHTML = `
+            <tr>
+                <td colspan="8"
+                    style="text-align:center;color:#777;padding:30px;">
+                    這個場次目前沒有資料
+                </td>
+            </tr>
+        `;
+
+        return;
+
+    }
+
+    recordsBody.innerHTML = list.map(record => {
+
+        const awards = Array.isArray(record.awards) ? record.awards : [];
+
+        const awardHtml = awards
+            .map(a => `<span class="tag">${escapeHtml(a)}</span>`)
+            .join("");
+
+        const photoUrl =
+            record.photoDriveUrl ||
+            (record.photoFileId
+                ? "https://drive.google.com/file/d/" +
+                  encodeURIComponent(record.photoFileId) + "/view"
+                : "");
+
+        const thumb = record.photoThumb
+            ? `<img src="${escapeHtml(record.photoThumb)}"
+                    style="width:36px;height:48px;object-fit:cover;border-radius:6px;vertical-align:middle;margin-right:6px;">`
+            : "";
+
+        const photoHtml = (photoUrl || thumb)
+            ? thumb + (photoUrl
+                ? `<a href="${escapeHtml(photoUrl)}" target="_blank" style="color:#d4af37;">開啟照片</a>`
+                : "")
+            : "-";
+
+        return `
+
+            <tr>
+
+                <td>${escapeHtml(eventNameOfRecord(record))}</td>
+
+                <td><strong>${escapeHtml(record.name)}</strong></td>
+
+                <td>${escapeHtml(record.occupation)}</td>
+
+                <td>${escapeHtml(record.platinum)}</td>
+
+                <td>${awardHtml}</td>
+
+                <td>${escapeHtml(record.email)}</td>
+
+                <td>${photoHtml}</td>
+
+                <td>
+                    <div class="actions">
+                        <button class="btn-danger"
+                            onclick="window.adminDelete('${record.id}')">刪除</button>
+                    </div>
+                </td>
+
+            </tr>
+
+        `;
+
+    }).join("");
+
+}
+
+
+/* ============================================================
+   Admin Delete
+============================================================ */
+
+window.adminDelete = async function (id) {
+
+    const record = records.find(r => r.id === id);
+
+    if (!record) {
+        return;
+    }
+
+    if (!confirm(`確定刪除「${record.name}」嗎？`)) {
+        return;
+    }
+
+    try {
+
+        showStatus("正在刪除...", "info");
+
+        await deleteDoc(doc(db, "recognitions", id));
+
+        if (record.photoFileId) {
+
+            try {
+
+                const token = await currentUser.getIdToken(true);
+
+                await postToAppsScript({
+                    action: "deletePhoto",
+                    idToken: token,
+                    fileId: record.photoFileId
+                });
+
+            } catch (error) {
+
+                console.warn("照片刪除失敗", error);
+
+            }
+
+        }
+
+        await loadRecords();
+
+        showStatus("資料已刪除。", "success");
+
+    } catch (error) {
+
+        showStatus("刪除失敗：" + error.message, "error");
+
+    }
+
+};
+
+
+/* ============================================================
+   Apps Script
+============================================================ */
+
+function postToAppsScript(fields) {
+
+    return new Promise(async (resolve, reject) => {
+
+        if (
+            !APPS_SCRIPT_URL ||
+            !APPS_SCRIPT_URL.includes("script.google.com/macros/s/") ||
+            !APPS_SCRIPT_URL.endsWith("/exec")
+        ) {
+
+            reject(new Error("Apps Script /exec URL 設定錯誤。"));
+
+            return;
+        }
+
+        const requestId =
+            "req_" +
+            Date.now() +
+            "_" +
+            Math.random().toString(36).slice(2, 10);
+
+        const requestData = {
+            ...fields,
+            requestId: requestId
+        };
+
+        const body = new URLSearchParams();
+
+        Object.entries(requestData).forEach(([key, value]) => {
+
+            body.append(
+                key,
+                typeof value === "string" ? value : String(value ?? "")
+            );
+
+        });
+
+        const timeoutMs = fields.action === "generatePpt" ? 600000 : 120000;
+
+        const controller = new AbortController();
+
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+        console.log("[BS GLOBAL] 準備送出 POST (fetch)", {
+            url: APPS_SCRIPT_URL,
+            action: fields.action,
+            requestId: requestId
+        });
+
+        try {
+
+            const response = await fetch(APPS_SCRIPT_URL, {
+                method: "POST",
+                body: body,
+                credentials: "omit",
+                signal: controller.signal
+            });
+
+            clearTimeout(timeoutId);
+
+            console.log("[BS GLOBAL] POST 回應 HTTP：" + response.status);
+
+            if (!response.ok) {
+
+                reject(new Error(
+                    "Apps Script 回應失敗（HTTP " + response.status + "）。"
+                ));
+
+                return;
+
+            }
+
+            let data;
+
+            try {
+
+                data = await response.json();
+
+            } catch (parseError) {
+
+                reject(new Error(
+                    "無法解析 Apps Script 回應：" + parseError.message
+                ));
+
+                return;
+
+            }
+
+            console.log("[BS GLOBAL] 收到回應", data);
+
+            if (data.requestId !== requestId) {
+
+                console.warn("[BS GLOBAL] requestId 不符，仍繼續處理", {
+                    expected: requestId,
+                    actual: data.requestId
+                });
+
+            }
+
+            if (data.success === true) {
+
+                resolve(data.result || {});
+
+            } else {
+
+                reject(new Error(data.error || "Apps Script 執行失敗。"));
+
+            }
+
+        } catch (error) {
+
+            clearTimeout(timeoutId);
+
+            if (error.name === "AbortError") {
+
+                reject(new Error(
+                    fields.action === "generatePpt"
+                        ? "Apps Script 沒有在 10 分鐘內回覆。請到 Apps Script「執行作業」查看是否收到這次請求。"
+                        : "Apps Script 沒有在 2 分鐘內回覆。"
+                ));
+
+            } else {
+
+                console.error("[BS GLOBAL] fetch 失敗", error);
+
+                reject(error);
+
+            }
+
+        }
+
+    });
+
+}
+
+
+/* ============================================================
+   生成 PPT（只匯出「檢視場次」所選的那一場）
+============================================================ */
+
+$("generatePptBtn").addEventListener("click", async () => {
+
+    const ev = viewEventId === ALL ? null : getEvent(viewEventId);
+
+    if (!ev) {
+
+        alert("請先在上方「檢視場次」選擇要匯出的場次（不能選「全部場次」）。");
+
+        return;
+
+    }
+
+    const eventRecords = records.filter(r => eventIdOfRecord(r) === ev.id);
+
+    if (!eventRecords.length) {
+
+        alert(`「${ev.name}」目前沒有表揚資料，無法生成 PPT。`);
+
+        return;
+
+    }
+
+    const btn = $("generatePptBtn");
+
+    const resultBox = $("pptResult");
+
+    if (
+        !confirm(
+            `確定要生成「${ev.name}」的 BS GLOBAL 榮耀表揚 PPT 嗎？\n\n` +
+            `只會匯出這個場次的 ${eventRecords.length} 位表揚者，不含其他場次。\n\n` +
+            "系統會依照目前設定的獎銜順序製作 PPT，並將照片插入簡報。\n\n資料較多時可能需要幾分鐘。"
+        )
+    ) {
+        return;
+    }
+
+    btn.disabled = true;
+
+    btn.textContent = "正在生成 PPT...";
+
+    resultBox.innerHTML = `
+
+        <div class="status info" style="display:block;line-height:1.8;">
+
+            <strong>PPT 正在製作中</strong>
+
+            <br>
+
+            正在整理獎銜、照片與版面。
+
+            <br>
+
+            請不要關閉此頁面。
+
+            <br>
+
+            資料較多時可能需要數分鐘。
+
+        </div>
+
+    `;
+
+    try {
+
+        const token = await currentUser.getIdToken(true);
+
+        /* 只傳 PPT 需要的資料 */
+
+        const pptRecords = eventRecords.map(record => ({
+
+            id: record.id,
+
+            name: record.name || "",
+
+            occupation: record.occupation || "",
+
+            platinum: record.platinum || "",
+
+            awards: Array.isArray(record.awards) ? record.awards : [],
+
+            photoFileId: record.photoFileId || "",
+
+            photoFileName: record.photoFileName || "",
+
+            /* 填寫者 Email */
+            email: record.email || ""
+
+        }));
+
+        resultBox.innerHTML = `
+
+            <div class="status info" style="display:block;line-height:1.8;">
+
+                已取得管理員權限。
+
+                <br>
+
+                正在將「${escapeHtml(ev.name)}」的
+                ${pptRecords.length}
+                位表揚者製作成 PPT...
+
+            </div>
+
+        `;
+
+        const result = await postToAppsScript({
+
+            action: "generatePpt",
+
+            idToken: token,
+
+            eventName: ev.name,
+
+            coverMonth: ev.monthKey || "",
+
+            records: JSON.stringify(pptRecords),
+
+            awardList: JSON.stringify(settings.awardList)
+
+        });
+
+        console.log("PPT result:", result);
+
+        resultBox.innerHTML = `
+
+            <div class="status success" style="display:block;line-height:1.8;">
+
+                <strong style="font-size:16px;">✓ PPT 已生成完成</strong>
+
+                <br><br>
+
+                場次：<strong>${escapeHtml(ev.name)}</strong>
+
+                <br>
+
+                共處理：
+
+                <strong>${pptRecords.length}</strong>
+
+                位表揚者。
+
+                <br><br>
+
+                
+                    href="${escapeHtml(result.downloadUrl || "")}"
+                    target="_blank"
+                    style="
+                        display:inline-block;
+                        background: linear-gradient(135deg, #b88a18, #d4af37, #f1d778);
+                        color:#111;
+                        padding:12px 18px;
+                        border-radius:10px;
+                        text-decoration:none;
+                        font-weight:800;">
+
+                    ⬇ 點擊下載 PPTX
+
+                </a>
+
+                <br><br>
+
+                ${
+                    result.presentationUrl
+                        ? `
+                            
+                                href="${escapeHtml(result.presentationUrl)}"
+                                target="_blank"
+                                style="color:#d4af37;font-weight:700;">
+                                開啟 Google Slides 原始簡報
+                            </a>
+                          `
+                        : ""
+                }
+
+            </div>
+
+        `;
+
+    } catch (error) {
+
+        console.error("PPT ERROR:", error);
+
+        resultBox.innerHTML = `
+
+            <div class="status error" style="display:block;line-height:1.8;">
+
+                <strong>PPT 生成失敗</strong>
+
+                <br><br>
+
+                ${escapeHtml(error.message || "未知錯誤")}
+
+                <br><br>
+
+                <span style="color:#aaa;font-size:12px;">
+
+                    如果 Google Drive 已經出現新的 PPT / Slides，
+                    請先不要重複生成。
+
+                </span>
+
+            </div>
+
+        `;
+
+    } finally {
+
+        btn.disabled = false;
+
+        btn.textContent = "一鍵生成完整 PPT";
+
+    }
+
+});
+
+
+/* ============================================================
+   CSV（依「檢視場次」）
+============================================================ */
+
+function viewFileLabel() {
+
+    const ev = viewEventId === ALL ? null : getEvent(viewEventId);
+
+    return (ev ? ev.name : "全部場次").replace(/[\\\/:*?"<>|]/g, "_");
+
+}
+
+$("csvBtn").addEventListener("click", () => {
+
+    const headers = [
+        "場次",
+        "姓名",
+        "職業",
+        "上線白金",
+        "突破獎銜",
+        "填寫者Email",
+        "照片檔案",
+        "照片Drive"
+    ];
+
+    const rows = viewRecords().map(r => [
+
+        eventNameOfRecord(r),
+
+        r.name || "",
+
+        r.occupation || "",
+
+        r.platinum || "",
+
+        Array.isArray(r.awards) ? r.awards.join(" / ") : "",
+
+        r.email || "",
+
+        r.photoFileName || "",
+
+        r.photoDriveUrl || ""
+
+    ]);
+
+    const csv =
+        "\uFEFF" +
+        [headers, ...rows]
+            .map(row =>
+                row.map(value =>
+                    `"${String(value).replace(/"/g, '""')}"`
+                ).join(",")
+            )
+            .join("\r\n");
+
+    downloadFile(
+        csv,
+        "BS_GLOBAL_表揚資料_" + viewFileLabel() + ".csv",
+        "text/csv;charset=utf-8;"
+    );
+
+});
+
+
+/* ============================================================
+   JSON（依「檢視場次」）
+============================================================ */
+
+$("jsonBtn").addEventListener("click", () => {
+
+    const data = viewRecords().map(r => {
+
+        const { photoThumb, ...rest } = r;
+
+        return {
+            ...rest,
+            eventName: eventNameOfRecord(r)
+        };
+
+    });
+
+    downloadFile(
+        JSON.stringify(data, null, 2),
+        "BS_GLOBAL_表揚資料_" + viewFileLabel() + ".json",
+        "application/json"
+    );
+
+});
+
+
+/* ============================================================
+   Download
+============================================================ */
+
+function downloadFile(content, filename, mime) {
+
+    const blob = new Blob([content], { type: mime });
+
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+
+    a.href = url;
+
+    a.download = filename;
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    a.remove();
+
+    URL.revokeObjectURL(url);
+
+}
+
+</script>
+
+</body>
+
+</html>
