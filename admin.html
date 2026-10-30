@@ -1812,7 +1812,13 @@ window.adminDelete = async function (id) {
 
         await deleteDoc(doc(db, "recognitions", id));
 
-        if (record.photoFileId) {
+        /* 同一張照片被其他場次的資料沿用時，不可刪 Drive 檔案 */
+
+        const photoShared = !!record.photoFileId && records.some(r =>
+            r.id !== id && r.photoFileId === record.photoFileId
+        );
+
+        if (record.photoFileId && !photoShared) {
 
             try {
 
@@ -2076,7 +2082,11 @@ $("editSaveBtn").addEventListener("click", async () => {
 
             const oldFileId = record.photoFileId;
 
-            if (oldFileId && oldFileId !== updateData.photoFileId) {
+            const oldShared = !!oldFileId && records.some(r =>
+                r.id !== editingRecordId && r.photoFileId === oldFileId
+            );
+
+            if (oldFileId && oldFileId !== updateData.photoFileId && !oldShared) {
 
                 try {
 

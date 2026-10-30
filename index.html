@@ -201,6 +201,69 @@ select:focus{ border-color:#d4af37; }
 
 .admin-link a{ color:#d4af37; text-decoration:none; }
 
+/* 記憶功能：姓名自動建議 */
+
+.name-wrap{ position:relative; }
+
+.suggest{
+  display:none; position:absolute; left:0; right:0; top:100%;
+  margin-top:6px; z-index:30;
+  background:#181818; border:1px solid rgba(212,175,55,.45);
+  border-radius:12px; max-height:320px; overflow:auto;
+  box-shadow:0 14px 40px rgba(0,0,0,.6);
+}
+
+.suggest-head{
+  padding:8px 12px; font-size:12px; color:#888;
+  border-bottom:1px solid #2a2a2a;
+}
+
+.suggest-item{
+  display:flex; align-items:center; gap:10px;
+  padding:10px 12px; cursor:pointer;
+  border-bottom:1px solid #232323;
+}
+
+.suggest-item:last-child{ border-bottom:0; }
+
+.suggest-item:hover,
+.suggest-item.active{ background:rgba(212,175,55,.12); }
+
+.suggest-photo{
+  width:38px; height:50px; border-radius:7px;
+  object-fit:cover; background:#222; flex:none;
+}
+
+.suggest-photo.none{ display:block; }
+
+.suggest-name{ color:#f3d66a; font-weight:800; font-size:15px; }
+
+.suggest-meta{ color:#999; font-size:12px; margin-top:2px; line-height:1.5; }
+
+.suggest-badge{
+  display:inline-block; margin-left:6px; padding:1px 7px;
+  border-radius:999px; font-size:11px; font-weight:700;
+  color:#ffaaaa; border:1px solid rgba(210,80,80,.4);
+}
+
+.reuse-box{
+  display:none; margin-top:12px; padding:12px;
+  border:1px solid rgba(212,175,55,.35); border-radius:12px;
+  background:rgba(212,175,55,.07);
+  font-size:13px; line-height:1.6; color:#e8d48a;
+}
+
+.reuse-row{ display:flex; gap:12px; align-items:flex-start; }
+
+.reuse-row img{
+  width:60px; height:80px; border-radius:9px;
+  object-fit:cover; background:#222; flex:none;
+}
+
+.reuse-warn{ color:#ffaaaa; margin-top:6px; }
+
+.reuse-actions{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+
 @media(max-width:700px){
 
   .form-grid{ grid-template-columns:1fr; }
@@ -315,12 +378,19 @@ select:focus{ border-color:#d4af37; }
           表揚者姓名 *
         </label>
 
-        <input
-          id="name"
-          type="text"
-          maxlength="100"
-          required
-          placeholder="請輸入姓名">
+        <div class="name-wrap">
+
+          <input
+            id="name"
+            type="text"
+            maxlength="100"
+            required
+            autocomplete="off"
+            placeholder="請輸入姓名（輸入英文名可搜尋舊資料）">
+
+          <div id="nameSuggest" class="suggest"></div>
+
+        </div>
 
       </div>
 
@@ -381,6 +451,8 @@ select:focus{ border-color:#d4af37; }
           id="existingPhoto"
           class="hint">
         </div>
+
+        <div id="reuseBox" class="reuse-box"></div>
 
         <div
           id="preview"
@@ -658,6 +730,8 @@ const eventTabs = document.getElementById("eventTabs");
 const recordsLoading = document.getElementById("recordsLoading");
 const recordsList = document.getElementById("recordsList");
 const messageBox = document.getElementById("message");
+const nameSuggest = document.getElementById("nameSuggest");
+const reuseBox = document.getElementById("reuseBox");
 
 
 /* =========================================================
@@ -685,6 +759,14 @@ let submitInProgress = false;
 let wasLoggedIn = false;
 let userInitiatedLogout = false;
 let logoutTimer = null;
+
+/* 記憶功能：從舊資料導入 */
+let reuseActive = false;      // 是否已從舊資料導入
+let reuseKey = "";            // 導入對象的名字（標準化）
+let reuseDupInEvent = false;  // 此人在本場次是否已有資料
+let reusedPhoto = null;       // 沿用的舊照片（不重新上傳）
+let suggestItems = [];
+let suggestIndex = -1;
 
 
 /* =========================================================
@@ -1196,6 +1278,13 @@ photoInput.addEventListener("change", async () => {
     return;
   }
 
+  /* 選了新照片：不再沿用舊照片 */
+
+  if (reusedPhoto) {
+    reusedPhoto = null;
+    renderReuseBox();
+  }
+
   try {
 
     const processed = await processImage(file);
@@ -1345,10 +1434,11 @@ form.addEventListener("submit", async event => {
         occupation: occupation,
         platinum: platinum,
         awards: awards,
-        photoFileId: "",
-        photoFileName: "",
-        photoDriveUrl: "",
-        photoThumb: "",
+        /* 沿用舊照片：直接引用同一個 Drive 檔案，不重新上傳 */
+        photoFileId: (!selectedPhoto && reusedPhoto) ? reusedPhoto.photoFileId : "",
+        photoFileName: (!selectedPhoto && reusedPhoto) ? reusedPhoto.photoFileName : "",
+        photoDriveUrl: (!selectedPhoto && reusedPhoto) ? reusedPhoto.photoDriveUrl : "",
+        photoThumb: (!selectedPhoto && reusedPhoto) ? reusedPhoto.photoThumb : "",
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
@@ -1428,11 +1518,17 @@ form.addEventListener("submit", async event => {
 
         try {
 
-          await postToAppsScript({
-            action: "deletePhoto",
-            idToken: await currentUser.getIdToken(true),
-            fileId: oldPhotoId
-          });
+          /* 舊照片若還被其他場次引用，就不能從 Drive 刪除 */
+
+          if (!(await photoUsedByOthers(oldPhotoId, editingRecordId))) {
+
+            await postToAppsScript({
+              action: "deletePhoto",
+              idToken: await currentUser.getIdToken(true),
+              fileId: oldPhotoId
+            });
+
+          }
 
         } catch (error) {
 
@@ -1864,6 +1960,9 @@ function startEdit(record) {
 
   }
 
+  clearReuse();
+  hideSuggest();
+
   editingRecordId = record.id;
   editingRecord = record;
 
@@ -1938,6 +2037,9 @@ function resetForm() {
 
   preview.style.display = "none";
 
+  clearReuse();
+  hideSuggest();
+
   refreshEventBanner();
 
 }
@@ -1986,11 +2088,17 @@ async function deleteRecord(record) {
 
       try {
 
-        await postToAppsScript({
-          action: "deletePhoto",
-          idToken: await currentUser.getIdToken(true),
-          fileId: record.photoFileId
-        });
+        /* 同一張照片還被其他場次引用時，只刪資料，保留 Drive 照片 */
+
+        if (!(await photoUsedByOthers(record.photoFileId, record.id))) {
+
+          await postToAppsScript({
+            action: "deletePhoto",
+            idToken: await currentUser.getIdToken(true),
+            fileId: record.photoFileId
+          });
+
+        }
 
       } catch (error) {
 
@@ -2014,6 +2122,471 @@ async function deleteRecord(record) {
     );
 
   }
+
+}
+
+
+/* =========================================================
+   記憶功能：輸入英文名 → 建議舊資料 → 一鍵導入
+   導入：姓名、職業、上線白金、照片（沿用同一個 Drive 檔案）
+   不導入：突破獎銜（每場不同，需重新選擇）
+========================================================= */
+
+function normName(value) {
+
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+
+}
+
+function thumbOf(photo) {
+
+  if (!photo) {
+    return "";
+  }
+
+  if (photo.photoThumb) {
+    return photo.photoThumb;
+  }
+
+  if (photo.photoFileId) {
+
+    return "https://drive.google.com/thumbnail?id=" +
+      encodeURIComponent(photo.photoFileId) + "&sz=w200";
+
+  }
+
+  return "";
+
+}
+
+/* 由我的所有舊資料整理出「人」的清單（同名只留一筆，取最新資料） */
+
+function buildPeopleMemory() {
+
+  const map = new Map();
+
+  myRecords.forEach(record => {
+
+    const key = normName(record.name);
+
+    if (!key) {
+      return;
+    }
+
+    let person = map.get(key);
+
+    if (!person) {
+
+      person = {
+        key: key,
+        name: record.name || "",
+        occupation: record.occupation || "",
+        platinum: record.platinum || "",
+        photo: null,
+        eventIds: new Set(),
+        count: 0
+      };
+
+      map.set(key, person);
+
+    }
+
+    person.count++;
+    person.eventIds.add(resolveRecordEventId(record));
+
+    /* myRecords 已由新到舊排序：最新一張有照片的記錄就是沿用對象 */
+
+    if (!person.photo && record.photoFileId) {
+
+      person.photo = {
+        photoFileId: record.photoFileId,
+        photoFileName: record.photoFileName || "",
+        photoDriveUrl: record.photoDriveUrl || "",
+        photoThumb: record.photoThumb || ""
+      };
+
+    }
+
+  });
+
+  return [...map.values()];
+
+}
+
+/* 其他記錄是否還在引用同一張 Drive 照片（刪除 Drive 檔案前必查） */
+
+async function photoUsedByOthers(fileId, excludeRecordId) {
+
+  if (!fileId) {
+    return false;
+  }
+
+  const snapshot = await getDocs(
+    query(
+      collection(db, "recognitions"),
+      where("uid", "==", currentUser.uid)
+    )
+  );
+
+  let used = false;
+
+  snapshot.forEach(snap => {
+
+    if (
+      snap.id !== excludeRecordId &&
+      snap.data().photoFileId === fileId
+    ) {
+      used = true;
+    }
+
+  });
+
+  return used;
+
+}
+
+/* ---------- 建議清單 ---------- */
+
+function hideSuggest() {
+
+  nameSuggest.style.display = "none";
+  nameSuggest.innerHTML = "";
+  suggestItems = [];
+  suggestIndex = -1;
+
+}
+
+function showSuggest() {
+
+  if (editingRecordId || !currentUser) {
+    hideSuggest();
+    return;
+  }
+
+  const q = normName(nameInput.value);
+
+  let people = buildPeopleMemory();
+
+  if (q) {
+
+    people = people
+      .filter(p => p.key.includes(q))
+      .sort((a, b) => {
+
+        const as = a.key.startsWith(q) ? 0 : 1;
+        const bs = b.key.startsWith(q) ? 0 : 1;
+
+        return as - bs;
+
+      });
+
+  }
+
+  people = people.slice(0, 6);
+
+  if (!people.length) {
+    hideSuggest();
+    return;
+  }
+
+  nameSuggest.innerHTML = "";
+
+  const head = document.createElement("div");
+  head.className = "suggest-head";
+  head.textContent = q
+    ? "找到以前填寫過的人，點選即可導入資料"
+    : "最近填寫過的人，點選即可導入資料";
+  nameSuggest.appendChild(head);
+
+  suggestItems = [];
+  suggestIndex = -1;
+
+  people.forEach(person => {
+
+    const item = document.createElement("div");
+    item.className = "suggest-item";
+
+    const src = thumbOf(person.photo);
+
+    const img = document.createElement("img");
+    img.className = "suggest-photo";
+
+    if (src) {
+
+      img.src = src;
+      img.onerror = () => { img.style.visibility = "hidden"; };
+
+    } else {
+
+      img.style.visibility = "hidden";
+
+    }
+
+    const info = document.createElement("div");
+
+    const nm = document.createElement("div");
+    nm.className = "suggest-name";
+    nm.textContent = person.name;
+
+    if (person.eventIds.has(settings.currentEventId)) {
+
+      const badge = document.createElement("span");
+      badge.className = "suggest-badge";
+      badge.textContent = "本場次已填寫";
+      nm.appendChild(badge);
+
+    }
+
+    const meta = document.createElement("div");
+    meta.className = "suggest-meta";
+    meta.textContent =
+      (person.occupation || "—") +
+      " ｜ " + (person.platinum || "—") +
+      " ｜ 填寫過 " + person.count + " 次" +
+      (person.photo ? "" : " ｜ 無照片");
+
+    info.appendChild(nm);
+    info.appendChild(meta);
+
+    item.appendChild(img);
+    item.appendChild(info);
+
+    /* mousedown：搶在輸入框 blur 之前處理，點選才不會失效 */
+
+    item.addEventListener("mousedown", e => {
+      e.preventDefault();
+      applyPerson(person);
+    });
+
+    nameSuggest.appendChild(item);
+
+    suggestItems.push({ el: item, person: person });
+
+  });
+
+  nameSuggest.style.display = "block";
+
+}
+
+function moveSuggest(step) {
+
+  if (!suggestItems.length) {
+    return;
+  }
+
+  suggestIndex =
+    (suggestIndex + step + suggestItems.length) % suggestItems.length;
+
+  suggestItems.forEach((entry, i) => {
+    entry.el.classList.toggle("active", i === suggestIndex);
+  });
+
+  suggestItems[suggestIndex].el.scrollIntoView({ block: "nearest" });
+
+}
+
+nameInput.addEventListener("input", () => {
+
+  /* 導入後又改名字：不能把別人的照片帶過去，直接取消導入 */
+
+  if (reuseActive && normName(nameInput.value) !== reuseKey) {
+    clearReuse();
+  }
+
+  showSuggest();
+
+});
+
+nameInput.addEventListener("focus", showSuggest);
+
+nameInput.addEventListener("blur", () => {
+  setTimeout(hideSuggest, 120);
+});
+
+nameInput.addEventListener("keydown", e => {
+
+  if (nameSuggest.style.display !== "block") {
+    return;
+  }
+
+  if (e.key === "ArrowDown") {
+
+    e.preventDefault();
+    moveSuggest(1);
+
+  } else if (e.key === "ArrowUp") {
+
+    e.preventDefault();
+    moveSuggest(-1);
+
+  } else if (e.key === "Enter" && suggestIndex >= 0) {
+
+    e.preventDefault();
+    applyPerson(suggestItems[suggestIndex].person);
+
+  } else if (e.key === "Escape") {
+
+    hideSuggest();
+
+  }
+
+});
+
+/* ---------- 導入 ---------- */
+
+function applyPerson(person) {
+
+  hideSuggest();
+
+  nameInput.value = person.name;
+  occupationInput.value = person.occupation;
+
+  let platinumMissing = false;
+
+  if (person.platinum && settings.platinumList.includes(person.platinum)) {
+
+    platinumSelect.value = person.platinum;
+
+  } else {
+
+    platinumSelect.value = "";
+    platinumMissing = !!person.platinum;
+
+  }
+
+  /* 突破獎銜不導入：每場不同，一律清空讓填寫者重選 */
+
+  document
+    .querySelectorAll('input[name="awards"]')
+    .forEach(input => { input.checked = false; });
+
+  photoInput.value = "";
+  preview.style.display = "none";
+
+  reuseActive = true;
+  reuseKey = person.key;
+  reusedPhoto = person.photo ? { ...person.photo } : null;
+  reuseDupInEvent = person.eventIds.has(settings.currentEventId);
+
+  renderReuseBox(platinumMissing ? person.platinum : "");
+
+}
+
+function clearReuse() {
+
+  reuseActive = false;
+  reuseKey = "";
+  reusedPhoto = null;
+  reuseDupInEvent = false;
+
+  renderReuseBox();
+
+}
+
+let lastMissingPlatinum = "";
+
+function renderReuseBox(missingPlatinum) {
+
+  if (missingPlatinum !== undefined) {
+    lastMissingPlatinum = missingPlatinum;
+  }
+
+  reuseBox.innerHTML = "";
+
+  if (!reuseActive) {
+
+    reuseBox.style.display = "none";
+    return;
+
+  }
+
+  reuseBox.style.display = "block";
+
+  const row = document.createElement("div");
+  row.className = "reuse-row";
+
+  const src = thumbOf(reusedPhoto);
+
+  if (reusedPhoto && src) {
+
+    const img = document.createElement("img");
+    img.src = src;
+    img.alt = "沿用的照片";
+    img.onerror = () => { img.style.display = "none"; };
+    row.appendChild(img);
+
+  }
+
+  const text = document.createElement("div");
+
+  const line1 = document.createElement("div");
+  line1.textContent = "已導入以前的資料（姓名、職業、上線白金" +
+    (reusedPhoto ? "、照片" : "") + "）。";
+  text.appendChild(line1);
+
+  const line2 = document.createElement("div");
+  line2.textContent = reusedPhoto
+    ? "照片沿用雲端同一個檔案，不會重複儲存；若要換照片，直接在上方選新照片即可。"
+    : "這個人以前沒有照片，可在上方選擇新照片（選填）。";
+  text.appendChild(line2);
+
+  const line3 = document.createElement("div");
+  line3.textContent = "突破獎銜不會導入，請重新選擇本次獎銜。";
+  text.appendChild(line3);
+
+  if (lastMissingPlatinum) {
+
+    const warn = document.createElement("div");
+    warn.className = "reuse-warn";
+    warn.textContent =
+      "上線白金「" + lastMissingPlatinum + "」已不在選項內，請重新選擇。";
+    text.appendChild(warn);
+
+  }
+
+  if (reuseDupInEvent) {
+
+    const warn = document.createElement("div");
+    warn.className = "reuse-warn";
+    warn.textContent =
+      "⚠ 這個人在本場次已經有一筆資料，再提交會產生重複。";
+    text.appendChild(warn);
+
+  }
+
+  row.appendChild(text);
+  reuseBox.appendChild(row);
+
+  const actions = document.createElement("div");
+  actions.className = "reuse-actions";
+
+  if (reusedPhoto) {
+
+    const noPhoto = document.createElement("button");
+    noPhoto.type = "button";
+    noPhoto.className = "btn btn-dark btn-small";
+    noPhoto.textContent = "不沿用照片";
+    noPhoto.onclick = () => {
+      reusedPhoto = null;
+      renderReuseBox();
+    };
+    actions.appendChild(noPhoto);
+
+  }
+
+  const cancel = document.createElement("button");
+  cancel.type = "button";
+  cancel.className = "btn btn-dark btn-small";
+  cancel.textContent = "取消導入並清空";
+  cancel.onclick = () => {
+    resetForm();
+  };
+  actions.appendChild(cancel);
+
+  reuseBox.appendChild(actions);
 
 }
 
