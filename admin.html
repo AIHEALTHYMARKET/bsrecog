@@ -43,6 +43,12 @@ body {
 }
 
 .card-title { color: #d4af37; font-size: 18px; font-weight: 700; margin-bottom: 18px; }
+.collapse-head { display:flex; align-items:center; justify-content:space-between; gap:10px; cursor:pointer; user-select:none; }
+.collapse-head .card-title { margin-bottom:0; }
+.collapse-btn { background:transparent; color:#d4af37; border:1px solid #705b20; border-radius:20px; padding:6px 14px; font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap; }
+.collapse-body { display:none; margin-top:18px; }
+.collapse-body.open { display:block; }
+
 
 .card-sub { color: #ddd; font-size: 14px; font-weight: 700; margin: 20px 0 10px; }
 
@@ -416,7 +422,12 @@ td { border-bottom: 1px solid #292929; padding: 10px; font-size: 12px; vertical-
 
     <div class="card">
 
-        <div class="card-title">上線白金設定</div>
+        <div class="collapse-head" onclick="toggleCollapse('platinumBody', this)">
+            <div class="card-title">上線白金設定</div>
+            <button type="button" class="collapse-btn">展開 ▼</button>
+        </div>
+
+        <div id="platinumBody" class="collapse-body">
 
         <div id="platinumSettings"></div>
 
@@ -425,12 +436,19 @@ td { border-bottom: 1px solid #292929; padding: 10px; font-size: 12px; vertical-
             <button id="addPlatinumBtn" class="btn-gold">新增</button>
         </div>
 
+        </div>
+
     </div>
 
 
     <div class="card">
 
-        <div class="card-title">突破獎銜設定</div>
+        <div class="collapse-head" onclick="toggleCollapse('awardBody', this)">
+            <div class="card-title">突破獎銜設定</div>
+            <button type="button" class="collapse-btn">展開 ▼</button>
+        </div>
+
+        <div id="awardBody" class="collapse-body">
 
         <div style="color:#888;font-size:12px;margin-bottom:15px;">
             排列順序會影響 PPT 判定「最高獎銜」。
@@ -442,6 +460,8 @@ td { border-bottom: 1px solid #292929; padding: 10px; font-size: 12px; vertical-
         <div class="add-row">
             <input id="newAward" placeholder="新增突破獎銜">
             <button id="addAwardBtn" class="btn-gold">新增</button>
+        </div>
+
         </div>
 
     </div>
@@ -2617,6 +2637,14 @@ function downloadFile(content, filename, mime) {
 
 </script>
 
+<script>
+function toggleCollapse(bodyId, head) {
+    var body = document.getElementById(bodyId);
+    var open = body.classList.toggle('open');
+    var btn = head.querySelector('.collapse-btn');
+    if (btn) btn.textContent = open ? '收起 ▲' : '展開 ▼';
+}
+</script>
 </body>
 
 </html>
